@@ -1,0 +1,308 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — studio page   (studio-page.js)
+
+   [ logo ]   Studio Name
+              AKA …  +2
+              ★★★★★
+              Studio about it all.
+              ───────────────────────────────────────────
+              Parent studio      Tags
+              ───────────────────────────────────────────
+              Custom fields
+              ───────────────────────────────────────────
+                    ···  Meta IDs  Edit  │  ♥  ✓  🔗
+
+   The panel's contents come from studio-page.js; everything else here
+   restyles Stash's own header, in the same shapes as the performer
+   and group pages.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Page width: centred, same cap as the performer and group pages ── */
+body:has(.sticky-sp) {
+    --sp-page: calc(300px + 2rem + 1000px);
+    --sp-edit-pad: 1.25rem;     /* above the Edit row's buttons */
+    --sp-edit-btn: 2.4rem;      /* and the buttons themselves */
+}
+.detail-header:has(.sticky-sp) .detail-container,
+body:has(.sticky-sp) .nav-tabs,
+body:has(.sticky-sp) .tab-content {
+    max-width: min(var(--sp-page), 100%);
+    min-width: 0;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+html:has(.sticky-sp),
+body:has(.sticky-sp) {
+    overflow-x: clip;
+}
+
+/* ── Frame: logo on the left, details on the right ────────────────── */
+.detail-header:has(.sticky-sp) {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.detail-header:has(.sticky-sp) .detail-container {
+    display: flex;
+    /* The logo panel matches the height of the details beside it */
+    align-items: stretch;
+    gap: 2rem;
+    padding: 0.5rem 0 1.75rem;
+}
+/* A logo is usually a wordmark on a transparent background, so it gets
+   a panel of its own to sit on rather than floating on the page. */
+.detail-header:has(.sticky-sp) .detail-header-image {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    max-width: 100%;
+    min-height: 11rem;
+    /* …stopping at the line above the Edit row rather than running on
+       past it. That line is the row's top border, so the panel gives
+       back exactly what sits below it: the row's padding and its
+       buttons. Both are named here so the two can't drift apart. */
+    margin-bottom: calc(var(--sp-edit-pad) + var(--sp-edit-btn));
+    padding: 1.5rem;
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+}
+.detail-header:has(.sticky-sp) .detail-header-image img.logo {
+    width: auto;
+    max-width: 100%;
+    max-height: 8rem;
+    object-fit: contain;
+}
+.detail-header:has(.sticky-sp) .detail-container > .row {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+}
+.detail-header:has(.sticky-sp) .studio-head {
+    padding: 0;
+}
+
+/* ── Title, with the favourite and link buttons on the right ──────── */
+.detail-header:has(.sticky-sp) .studio-head > h2 {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin: 0 0 0.35rem;
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text);
+}
+.detail-header:has(.sticky-sp) .studio-head > h2 .studio-name {
+    min-width: 0;
+}
+/* Pushed right, and sized down out of the heading's type scale */
+.detail-header:has(.sticky-sp) .studio-head > h2 .name-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+    font-size: 1rem;
+}
+.detail-header:has(.sticky-sp) .studio-head > h2 .name-icons .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: var(--radius-sm) !important;
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+}
+.detail-header:has(.sticky-sp) .studio-head > h2 .name-icons .btn:hover {
+    background: var(--control-bg) !important;
+    color: var(--text) !important;
+}
+/* Stash's collapse arrow isn't needed: nothing here collapses */
+.detail-header:has(.sticky-sp) .detail-expand-collapse {
+    display: none !important;
+}
+
+/* Stars, left where Stash draws them so rating still works */
+.detail-header:has(.sticky-sp) .studio-head > .quality-group {
+    margin: 0 0 1.1rem -0.35rem;
+}
+
+/* ── The panel ──────────────────────────────────────────────────────
+   Stash's .detail-group is a flex row, which laid the description,
+   the facts and the custom fields out side by side and squeezed the
+   facts grid to the width of its contents. This panel is a column. */
+.detail-group.sticky-sp {
+    display: block !important;
+}
+
+.sticky-sp-desc {
+    max-width: 60rem;
+    margin: 0 0 1.4rem;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+}
+.sticky-sp-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+.sticky-sp-fact__label {
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+.sticky-sp-fact__value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+}
+.sticky-sp-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.sticky-sp-link,
+.sticky-sp-link:hover {
+    color: var(--text) !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(255, 255, 255, 0.3) !important;
+    text-underline-offset: 4px;
+}
+.sticky-sp-link:hover {
+    text-decoration-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Custom fields: the studio's own extra columns */
+.sticky-sp-custom {
+    margin-top: 1.5rem;
+}
+.sticky-sp-custom__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.25rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+.sticky-sp-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    padding: 0 0.4rem;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+/* ── Edit row: quiet buttons, to the right, as in the mock-up ─────── */
+.detail-header:has(.sticky-sp) .studio-head > .details-edit {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.75rem;
+    padding-top: var(--sp-edit-pad);
+    border-top: 1px solid var(--border);
+}
+/* Two things made these three unevenly spaced: an empty div Stash
+   leaves between Edit and Auto tag, and a margin of its own on each
+   button on top of the row's gap. Both go, and the row's gap is the
+   only thing setting the spacing. */
+.detail-header:has(.sticky-sp) .studio-head > .details-edit > div:empty {
+    display: none;
+}
+.detail-header:has(.sticky-sp) .studio-head > .details-edit > * {
+    margin: 0 !important;
+}
+.detail-header:has(.sticky-sp) .studio-head > .details-edit .btn {
+    height: 2.4rem;
+    padding: 0 1rem !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+    border-radius: var(--radius-sm) !important;
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+.detail-header:has(.sticky-sp) .studio-head > .details-edit .btn:hover {
+    background: var(--control-bg) !important;
+    color: var(--text) !important;
+}
+/* Delete keeps its warning colour, but not its solid red fill */
+.detail-header:has(.sticky-sp) .studio-head > .details-edit .btn.btn-danger {
+    color: #ff7a7a !important;
+    border-color: rgba(255, 122, 122, 0.35) !important;
+}
+
+/* ── Narrow screens ───────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+    .detail-header:has(.sticky-sp) .detail-container {
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    .detail-header:has(.sticky-sp) .detail-header-image {
+        width: 100%;
+        min-height: 8rem;
+    }
+    .detail-header:has(.sticky-sp) .studio-head > h2 {
+        font-size: 2rem;
+    }
+    .sticky-sp-facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ── AKA line and action row (page-actions.js) ────────────────────
+   They replace Stash's alias line, Edit/Auto tag/Delete row and the
+   icons beside the name; each original is hidden only once ours is
+   there. */
+.studio-head:has(> .sticky-sp-actions) > .details-edit,
+.studio-head:has(> .sticky-sp-actions .sticky-act-icons) > h2 .name-icons,
+.studio-head:has(> .sticky-sp-aka) > div:has(> .alias-head) {
+    display: none !important;
+}
+.studio-head > .sticky-sp-actions {
+    margin-top: 1.75rem;
+    padding-top: var(--sp-edit-pad, 1rem);
+    border-top: 1px solid var(--border);
+}
+.studio-head > .sticky-sp-aka {
+    margin: 0 0 0.4rem;
+}
+.detail-group.sticky-sp.sticky-sp--empty {
+    display: none !important;
+}
+
+/* Phones: the logo box's bottom margin only lines it up with the
+   Edit row beside it on wide screens; stacked, it was 50px of nothing
+   under the logo. The action row also sits closer to what's above. */
+@media (max-width: 767.98px) {
+    .detail-header:has(.sticky-sp) .detail-header-image {
+        margin-bottom: 0 !important;
+        min-height: 0 !important;
+        padding: 1.25rem !important;
+    }
+    .detail-header:has(.sticky-sp) .detail-header-image img {
+        max-height: 6rem;
+    }
+    .studio-head > .sticky-sp-actions {
+        margin-top: 1rem;
+        padding-top: 1rem;
+    }
+}

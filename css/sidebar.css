@@ -1,0 +1,255 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — filter sidebar (Scenes)
+
+   - Sits below the navbar instead of underneath it
+   - Its own search box is hidden (the toolbar has one)
+   - No fill of its own: blends into the page background
+   - Saved filters: always open, pinned to the top, header removed;
+     "Save" and "Make default" buttons, then the list of saved filters.
+     (Stash's "Filter name…" box is really a search of saved filters,
+     not a name field, so it's hidden too.)
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Panel: no fill of its own, it sits straight on the page blue ── */
+.sidebar-pane .sidebar {
+    background: transparent !important;
+    color: var(--text-muted);
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Below the navbar (Stash positions it for its original, shorter bar) */
+@media (min-width: 576px) {
+    .sidebar-pane .sidebar {
+        top: var(--nav-height) !important;
+        max-height: calc(100vh - var(--nav-height)) !important;
+    }
+}
+/* Phones: while open, the sidebar fills the whole screen with the
+   same gradient as the page. The tab bar stays on top, and the
+   last section is kept clear of it. */
+@media (max-width: 575.98px) {
+    .sidebar-pane:not(.hide-sidebar) .sidebar {
+        position: fixed !important;
+        inset: 0 !important;
+        width: 100vw !important;
+        max-width: none !important;
+        height: 100dvh !important;
+        max-height: none !important;
+        z-index: 1029 !important;            /* just under the tab bar */
+        overflow-y: auto;
+        background-color: var(--bg-0) !important;
+        background-image: linear-gradient(to bottom,
+            var(--gradient-top) 0%,
+            var(--gradient-mid) 45%,
+            var(--bg-0) 100%) !important;
+        background-size: 100% var(--gradient-height) !important;
+        background-repeat: no-repeat !important;
+        padding-top: calc(env(safe-area-inset-top) + 1rem) !important;
+        padding-bottom: calc(var(--tabbar-height) + var(--tabbar-gap) * 2 + env(safe-area-inset-bottom)) !important;
+    }
+}
+
+/* Closed sidebar: Stash "closes" it by sliding it off to the left.
+   On full-width pages that's off-screen, but on centred pages (the
+   performer page) it slid into the empty margin and stayed visible.
+   Hide it outright whenever Stash marks it closed. */
+.sidebar-pane.hide-sidebar > .sidebar {
+    visibility: hidden !important;
+}
+
+/* Its own search box */
+.sidebar-pane .sidebar .sidebar-search-container {
+    display: none !important;
+}
+
+/* Same gap on both sides of everything in the panel */
+.sidebar-pane .sidebar {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    box-sizing: border-box;
+}
+
+/* ── Sections (Studios, Performers, Tags …) ───────────────────────── */
+/* Search fields inside sections: same style as the toolbar search */
+.sidebar-pane .sidebar .sidebar-section input.form-control:not([type="checkbox"]):not([type="radio"]) {
+    width: 100%;
+    height: 2.4rem;
+    padding-left: 2.3rem !important;
+    border: 0 !important;
+    border-radius: var(--radius-sm) !important;
+    background: rgba(255, 255, 255, 0.12)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='M16 16l4 4'/%3E%3C/svg%3E")
+        no-repeat 0.8rem center / 1rem !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
+    font-size: 0.95rem;
+}
+.sidebar-pane .sidebar .sidebar-section input.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+.sidebar-pane .sidebar .sidebar-section {
+    border-color: var(--surface-border) !important;
+}
+.sidebar-pane .sidebar .collapse-button {
+    color: var(--text-muted) !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    font-weight: 600;
+    transition: color var(--ease);
+}
+.sidebar-pane .sidebar .collapse-button:hover {
+    color: var(--text) !important;
+}
+
+/* ── Saved filters ────────────────────────────────────────────────── */
+/* Always open, no header. Stash only builds this section's contents
+   while it's open, so list-toolbar.js opens it once if it's closed;
+   the CSS below then hides the header so it stays that way. (It's
+   already Stash's first section, so with the search box hidden it
+   sits at the top.) */
+.sidebar-saved-filters > .collapse-header {
+    display: none !important;
+}
+.sidebar-saved-filters > .collapse {
+    display: block !important;
+    height: auto !important;
+}
+
+/* Hidden: the saved-filter search box */
+.sidebar-saved-filters .saved-filter-search-input {
+    display: none !important;
+}
+
+/* Two buttons side by side, styled like the toolbar */
+.sidebar-saved-filters .toolbar {
+    display: flex !important;
+    gap: 0.5rem;
+    /* Top padding tuned so the buttons line up with toolbar row 2 */
+    padding: 0.3rem 0 0.5rem;
+}
+.sidebar-saved-filters .toolbar .btn {
+    flex: 1 1 0;
+    white-space: nowrap;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    height: 2.4rem;
+    padding: 0 0.75rem !important;
+    border: 0 !important;
+    border-radius: var(--radius-sm) !important;
+    background: var(--control-bg) !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+    font-size: 0 !important;             /* hides Stash's wording … */
+    transition: color var(--ease), background-color var(--ease);
+}
+.sidebar-saved-filters .toolbar .btn > * {
+    display: none;
+}
+.sidebar-saved-filters .toolbar .btn::after {
+    font-size: 0.95rem;                  /* … and writes ours */
+    font-weight: 600;
+}
+.sidebar-saved-filters .save-filter-button::after {
+    content: "Save";
+}
+.sidebar-saved-filters .set-as-default-button::after {
+    content: "Default";
+}
+.sidebar-saved-filters .set-as-default-button::before {
+    content: "";
+    width: 1.15rem;
+    height: 1.15rem;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7L12 17.4l-6.3 3.8 1.7-7L2 9.5l7.1-.6z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7L12 17.4l-6.3 3.8 1.7-7L2 9.5l7.1-.6z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+/* Bookmark icon on Save, like the toolbar's Saved button */
+.sidebar-saved-filters .save-filter-button::before {
+    content: "";
+    width: 0.8rem;
+    height: 0.95rem;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath d='M0 48C0 21.5 21.5 0 48 0h288c26.5 0 48 21.5 48 48v440c0 18.9-21.6 30.1-37.1 19.2L192 403.4 37.1 507.2C21.6 518.1 0 506.9 0 488z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 384 512'%3E%3Cpath d='M0 48C0 21.5 21.5 0 48 0h288c26.5 0 48 21.5 48 48v440c0 18.9-21.6 30.1-37.1 19.2L192 403.4 37.1 507.2C21.6 518.1 0 506.9 0 488z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.sidebar-saved-filters .toolbar .btn:hover {
+    background: var(--control-bg-hover) !important;
+    color: var(--text) !important;
+}
+.sidebar-saved-filters .toolbar .btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+    outline-offset: 2px;
+}
+
+/* The list of saved filters */
+.sidebar-saved-filters .saved-filter-list {
+    list-style: none;
+    margin: 0 0 0.5rem;
+    padding: 0;
+}
+.sidebar-saved-filters .saved-filter-item > a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.35rem 0.4rem 0.35rem 0.75rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted) !important;
+    font-weight: 600;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: color var(--ease), background-color var(--ease);
+}
+.sidebar-saved-filters .saved-filter-item > a:hover {
+    background: var(--control-bg);
+    color: var(--text) !important;
+}
+.sidebar-saved-filters .saved-filter-item .delete-button {
+    color: var(--text-muted) !important;
+    background: transparent !important;
+    border: 0 !important;
+    opacity: 0.6;
+}
+.sidebar-saved-filters .saved-filter-item .delete-button:hover {
+    opacity: 1;
+    color: var(--text) !important;
+}
+
+/* "Edit Filter" (small screens): styled like Save / Default, with
+   brighter text */
+.sidebar-pane .sidebar .edit-filter-button {
+    width: 100%;
+    height: 2.4rem;
+    margin-bottom: 0.5rem;
+    border: 0 !important;
+    border-radius: var(--radius-sm) !important;
+    background: var(--control-bg) !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: background-color var(--ease);
+}
+.sidebar-pane .sidebar .edit-filter-button:hover {
+    background: var(--control-bg-hover) !important;
+}
+
+/* "Show 94 results" footer: no black strip behind it */
+.sidebar-pane .sidebar .sidebar-footer {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.sidebar-pane .sidebar .sidebar-footer .btn {
+    height: 2.4rem;
+    border: 0 !important;
+    border-radius: var(--radius-sm) !important;
+    background: var(--control-bg) !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
+    font-weight: 600;
+}

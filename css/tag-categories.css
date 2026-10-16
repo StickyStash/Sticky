@@ -1,0 +1,701 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — Tags page "Categories" view   (tag-categories.js)
+
+   [ All · Action · People · Scene · Unsorted ]      ← tabs
+   ┌ sidebar ────────┐  Action ─────────────── 6 tags · 2 categories
+   │ Action        6 │  Acts  (links to tag)                 4 tags
+   │   Acts        4 │  description
+   │   Finishers   1 │  (Tag 11) (Tag 5) (Tag 2)      
+   │ Scene        14 │  …
+   └─────────────────┘
+   Phones: no sidebar; a sideways row of chips under the tabs instead.
+
+   While the view is on, <body> has .sticky-tc-on and Stash's own grid,
+   sort, filters, zoom and paging are hidden (they don't apply here).
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── "Categories": the fourth segment of grid / list / tagger ─────
+   It used to be a separate outlined button sitting beside the view
+   switcher. It is now the last segment of that switcher: no label,
+   just the icon, flush against the tagger button and carrying the
+   group's right-hand corners. */
+.filtered-list-toolbar > .sticky-tc-slot {
+    order: 20;                 /* the view switcher's own place */
+    display: inline-flex;
+    margin-left: -0.5rem;      /* cancels the toolbar's column gap */
+    margin-right: 0.5rem;
+}
+/* The tagger button gives up its right-hand corners to ours */
+body.sticky-tc-page .filtered-list-toolbar
+    > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(3) {
+    border-radius: 0 !important;
+    margin-right: 0 !important;
+}
+.filtered-list-toolbar > .sticky-tc-slot > .sticky-tc-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    width: 2.6rem;
+    padding: 0 !important;
+    font-size: 0 !important;   /* the word "Categories" steps aside */
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 0 !important;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+    color: var(--text-muted) !important;
+    font-weight: 600;
+    box-shadow: none !important;
+    transition: background-color var(--ease), color var(--ease);
+}
+.filtered-list-toolbar > .sticky-tc-slot > .sticky-tc-toggle:hover {
+    background: var(--control-bg) !important;
+    color: var(--text) !important;
+}
+.filtered-list-toolbar > .sticky-tc-slot > .sticky-tc-toggle.active {
+    background: var(--pill-active) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+}
+/* Icon: a small tree (category → parent → sub-tag) */
+.sticky-tc-toggle::before {
+    content: "";
+    width: 1.15rem;
+    height: 1.15rem;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M4 5h16M9 12h11M9 19h11M5 5v14M5 12h2M5 19h2'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M4 5h16M9 12h11M9 19h11M5 5v14M5 12h2M5 19h2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+/* While on: Stash's highlighted view button looks unselected */
+body.sticky-tc-on .filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn.active {
+    background: var(--control-bg) !important;
+    color: var(--text-muted) !important;
+}
+/* ── While on: hide what doesn't apply ────────────────────────────── */
+body.sticky-tc-on div:has(> .filtered-list-toolbar) > :not(.filtered-list-toolbar),
+body.sticky-tc-on .filtered-list-toolbar > .search-term-input,
+body.sticky-tc-on .filtered-list-toolbar > .sort-by-select,
+body.sticky-tc-on .filtered-list-toolbar > .btn-group:has(.filter-button),
+body.sticky-tc-on .filtered-list-toolbar > .zoom-slider-container,
+body.sticky-tc-on .filtered-list-toolbar > .page-size-selector,
+body.sticky-tc-on .filtered-list-toolbar > .list-operations,
+body.sticky-tc-on .filtered-list-toolbar .play-button,
+body.sticky-tc-on .sidebar-pane > .sidebar {
+    display: none !important;
+}
+/* The view sits in Stash's flex layout, where an item grows to fit
+   its widest content by default. The sideways-scrolling tab and chip
+   rows would then push the page wider than a phone screen. */
+.sticky-tc {
+    min-width: 0;
+    max-width: 100%;
+}
+/* ── View ─────────────────────────────────────────────────────────── */
+.sticky-tc {
+    --tc-side: 260px;
+    --tc-gap: 2.5rem;
+    margin-top: 1rem;
+    padding-bottom: 3rem;
+    color: var(--text);
+}
+.sticky-tc--message {
+    padding: 2rem 0;
+    color: var(--text-muted);
+}
+/* Tabs: a segmented control, current tab in the translucent pill */
+.sticky-tc-tabs {
+    display: inline-flex;
+    gap: 2px;
+    max-width: 100%;
+    padding: 4px;
+    border-radius: 10px;
+    background: var(--control-bg);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.sticky-tc-tabs::-webkit-scrollbar { display: none; }
+.sticky-tc-tab {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    flex-shrink: 0;
+    padding: 0.45rem 1rem;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--ease), color var(--ease);
+}
+.sticky-tc-tab:hover:not(:disabled) {
+    background: var(--pill-hover);
+    color: var(--text);
+}
+.sticky-tc-tab.is-active {
+    background: var(--pill-active);
+    color: #fff;
+}
+.sticky-tc-tab__count {
+    font-size: 0.95rem;
+    font-weight: 500;
+    opacity: 0.6;
+    font-variant-numeric: tabular-nums;
+}
+/* Unsorted: greyed, set slightly apart */
+.sticky-tc-tab.is-muted {
+    margin-left: 0.5rem;
+    opacity: 0.5;
+}
+.sticky-tc-tab.is-muted.is-active,
+.sticky-tc-tab.is-muted:hover:not(:disabled) {
+    opacity: 0.85;
+}
+.sticky-tc-tab:disabled {
+    cursor: default;
+    opacity: 0.3;
+}
+/* Two columns: sidebar + list */
+.sticky-tc-body {
+    display: grid;
+    grid-template-columns: var(--tc-side) minmax(0, 1fr);
+    gap: var(--tc-gap);
+    align-items: start;
+    margin-top: 1.75rem;
+}
+.sticky-tc-body--single {
+    grid-template-columns: minmax(0, 1fr);
+}
+/* ── Sidebar ──────────────────────────────────────────────────────── */
+.sticky-tc-side {
+    position: sticky;
+    top: calc(var(--nav-height) + var(--page-gap));
+    max-height: calc(100vh - var(--nav-height) - var(--page-gap) * 2);
+    overflow-y: auto;
+    padding-right: 1rem;
+    border-right: 1px solid var(--border);
+}
+.sticky-tc-side__group + .sticky-tc-side__group {
+    margin-top: 1.1rem;
+}
+.sticky-tc-side__label {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px 0.35rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text);
+}
+.sticky-tc-side__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.4rem 10px 0.4rem 20px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.15rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--ease), color var(--ease);
+}
+.sticky-tc-side__item:hover {
+    background: var(--pill-hover);
+    color: var(--text);
+}
+.sticky-tc-side__item.is-active {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+.sticky-tc-side__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.sticky-tc-side__count {
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.75;
+}
+.sticky-tc-side__item.is-active .sticky-tc-side__count {
+    min-width: 1.5rem;
+    padding: 1px 6px;
+    border-radius: var(--radius-pill);
+    background: rgba(0, 0, 0, 0.3);
+    text-align: center;
+    opacity: 1;
+}
+/* ── Category → parent → pills ────────────────────────────────────── */
+.sticky-tc-cat + .sticky-tc-cat {
+    margin-top: 2.75rem;
+}
+.sticky-tc-cat__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding-bottom: 0.65rem;
+    margin-bottom: 1.4rem;
+    border-bottom: 1px solid var(--border);
+}
+.sticky-tc-cat__name {
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 600;
+}
+.sticky-tc-meta {
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+.sticky-tc-parent {
+    scroll-margin-top: calc(var(--nav-height) + var(--page-gap) + 0.5rem);
+}
+.sticky-tc-parent + .sticky-tc-parent {
+    margin-top: 1.9rem;
+}
+.sticky-tc-parent__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+}
+.sticky-tc-parent__name {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+/* Parent name links to its tag page */
+.sticky-tc-parent__name a,
+.sticky-tc-parent__name a:hover {
+    color: var(--text) !important;
+    text-decoration: none !important;
+}
+.sticky-tc-parent__name a:hover {
+    text-decoration: underline !important;
+    text-decoration-color: rgba(255, 255, 255, 0.4) !important;
+    text-underline-offset: 4px;
+}
+.sticky-tc-parent__desc {
+    margin: 0.35rem 0 0;
+    font-size: 1.02rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.55);
+}
+.sticky-tc-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 0.8rem;
+}
+.sticky-tc-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    max-width: 100%;
+    padding: 6px 7px 6px 15px;
+    border-radius: var(--radius-pill);
+    background: var(--chip-bg);
+    color: var(--text) !important;
+    font-size: 1.05rem;
+    font-weight: 500;
+    line-height: 1.3;
+    text-decoration: none !important;
+    transition: background-color var(--ease);
+}
+.sticky-tc-pill:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+.sticky-tc-pill__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* Count: the same chip as the Filters button's count */
+.sticky-tc-pill__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    padding: 0 0.4rem;
+    border-radius: var(--radius-pill);
+    background: var(--pill-active);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+.sticky-tc-empty {
+    margin: 0.8rem 0 0;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.4);
+}
+.sticky-tc-empty--page {
+    margin-top: 2rem;
+}
+/* Phone jump chips: hidden until the sidebar goes */
+.sticky-tc-jump {
+    display: none;
+}
+/* ── Tablets and phones: sidebar becomes a row of chips ───────────── */
+/* ── Phones: a page of its own ─────────────────────────────────────
+   "Tags ▾"  (view menu: Categories / Grid / List / Tagger)
+   [ Stash's search box, full width, "Find a tag or alias" ]
+   All 29 · Action 4 · People 1 · Scene 19 · Unsorted      ← scrolls
+   (Locations) (Moods) (Surfaces)                          ← scrolls
+   ── Locations ────────────────────────────── 10 tags ›
+   [ Sub-tag  36 ] [ Sub-tag   13 ]
+   [ Sub-tag   4 ] [ Sub-tag    3 ]
+              +4 more
+
+   Busier tags read brighter, quiet ones are dimmed; the tiers come
+   from your own library, not fixed numbers.
+   Scrolling down shrinks the title and search into one sticky row.
+   ─────────────────────────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+    /* Title and search: one sticky band at the top */
+    /* Both bands are clear with just a blur, so the page's blue runs
+       right through them: no strip, no lighter panel. */
+    /* Search: the full width of the row, a little below the title */
+    body.sticky-tc-page .filtered-list-toolbar > .search-term-input {
+        order: 10;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        position: sticky;
+        top: 3.2rem;
+        z-index: 30;
+        margin-top: 0.35rem !important;
+        margin-bottom: 0.5rem !important;
+        padding-bottom: 0.5rem;
+        background: transparent;
+        -webkit-backdrop-filter: blur(18px);
+        backdrop-filter: blur(18px);
+        transition: flex-basis var(--ease);
+    }
+    body.sticky-tc-page .filtered-list-toolbar > .search-term-input input {
+        width: 100% !important;
+        height: 2.75rem;
+    }
+    /* grid / list / tagger: the title menu covers these on phones, in
+       every view, so the top of the page always looks the same */
+    body.sticky-tc-page .filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)),
+    body.sticky-tc-page .filtered-list-toolbar > .zoom-slider-container,
+    body.sticky-tc-page .filtered-list-toolbar > .sticky-tc-slot {
+        display: none !important;
+    }
+    body.sticky-tc-tight.sticky-tc-page .filtered-list-toolbar > .search-term-input {
+        flex: 0 0 3rem !important;
+        width: 3rem !important;
+        top: 0;
+        overflow: hidden;
+    }
+    body.sticky-tc-tight.sticky-tc-page .filtered-list-toolbar > .search-term-input:focus-within {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        overflow: visible;
+    }
+    /* Tabs: plain text with an underline on the current one */
+    .sticky-tc-tabs {
+        display: flex;
+        gap: 1.1rem;
+        padding: 0;
+        border-radius: 0;
+        background: transparent;
+    }
+    .sticky-tc-tab {
+        padding: 0.4rem 0;
+        border-radius: 0;
+        font-size: 1.15rem;
+    }
+    .sticky-tc-tab:hover:not(:disabled),
+    .sticky-tc-tab.is-active {
+        background: transparent;
+    }
+    .sticky-tc-tab.is-active {
+        color: #fff;
+        box-shadow: inset 0 -2px 0 #fff;
+    }
+    .sticky-tc-tab__count {
+        font-size: 0.85rem;
+    }
+    .sticky-tc-tab.is-muted {
+        margin-left: 0;
+    }
+    .sticky-tc-body {
+        grid-template-columns: minmax(0, 1fr);
+        margin-top: 1rem;
+    }
+    .sticky-tc-side {
+        display: none;
+    }
+    /* Chips: jump to a section */
+    .sticky-tc-jump {
+        display: flex;
+        gap: 6px;
+        margin: 0 0 1.25rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .sticky-tc-jump::-webkit-scrollbar { display: none; }
+    .sticky-tc-jump__chip {
+        flex-shrink: 0;
+        padding: 0.4rem 0.9rem;
+        border: 1px solid var(--chip-border);
+        border-radius: var(--radius-pill);
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    .sticky-tc-jump__chip.is-active {
+        background: var(--pill-active);
+        border-color: transparent;
+        color: #fff;
+    }
+    /* Sections: a line between each, name left, "10 tags ›" right */
+    .sticky-tc-cat__head,
+    .sticky-tc-parent__head {
+        flex-wrap: wrap;
+        row-gap: 0.2rem;
+    }
+    .sticky-tc-cat__name { font-size: 1.45rem; }
+    .sticky-tc-parent + .sticky-tc-parent {
+        margin-top: 1.4rem;
+        padding-top: 1.4rem;
+        border-top: 1px solid var(--border);
+    }
+    .sticky-tc-parent__name { font-size: 1.35rem; }
+    .sticky-tc-parent__desc { display: none; }
+    .sticky-tc-open,
+    .sticky-tc-open:hover {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        color: var(--text-muted) !important;
+        text-decoration: none !important;
+    }
+    .sticky-tc-open::after {
+        content: "";
+        width: 0.7rem;
+        height: 0.7rem;
+        background-color: currentColor;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5l7 7-7 7'/%3E%3C/svg%3E") center / contain no-repeat;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5l7 7-7 7'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+    /* Two columns of rows */
+    .sticky-tc-rows {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 0.9rem;
+    }
+    .sticky-tc-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        min-width: 0;
+        padding: 0.8rem 0.95rem;
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text) !important;
+        font-size: 1.05rem;
+        text-decoration: none !important;
+    }
+    .sticky-tc-row__name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .sticky-tc-row__count {
+        flex-shrink: 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-variant-numeric: tabular-nums;
+    }
+    /* Busiest tags: lighter row, brighter text */
+    .sticky-tc-row[data-tier="top"] {
+        background: rgba(255, 255, 255, 0.1);
+        font-weight: 600;
+    }
+    /* Quietest tags: same row, dimmed */
+    .sticky-tc-row[data-tier="low"] {
+        color: rgba(255, 255, 255, 0.45) !important;
+    }
+    .sticky-tc-row[data-tier="low"] .sticky-tc-row__count {
+        color: rgba(255, 255, 255, 0.35);
+    }
+    .sticky-tc-more {
+        display: block;
+        width: 100%;
+        margin-top: 0.8rem;
+        padding: 0.5rem;
+        border: 0;
+        background: transparent;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+    .sticky-tc-more::after {
+        content: " \2304";
+    }
+}
+
+/* ── The view's own search field ──────────────────────────────────
+   It used to borrow Stash's search box, which meant watching that box
+   four times a second (its clear button empties it from inside React
+   and tells nobody) and putting our placeholder back every second.
+   Owning the field costs one input and removes both timers. Stash's
+   box is hidden while this view is showing, so there is still only
+   ever one search on the page. */
+.sticky-tc-search {
+    margin: 0 0 1rem;
+}
+.sticky-tc-search__input {
+    width: 100%;
+    max-width: 26rem;
+    height: 2.4rem;
+    padding: 0 0.9rem 0 2.3rem;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.12)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='M16 16l4 4'/%3E%3C/svg%3E")
+        no-repeat 0.8rem center / 1rem;
+    color: var(--text);
+    font-size: 0.95rem;
+}
+.sticky-tc-search__input::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* Our field is <input type="search">, so Chrome draws its own clear
+   affordance: a small grey ✕ bitmap we can't recolour. Replace it
+   with a white ✕ of our own — the glyph is painted as a mask so it
+   takes the colour below it, which keeps it matching the toolbar's
+   clear button on every surface. */
+.sticky-tc-search__input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: -0.25rem;
+    background-color: #fff;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E") no-repeat center / 0.8rem;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 6l12 12M18 6L6 18'/%3E%3C/svg%3E") no-repeat center / 0.8rem;
+    cursor: pointer;
+    opacity: 0.7;
+}
+.sticky-tc-search__input::-webkit-search-cancel-button:hover {
+    opacity: 1;
+}
+.sticky-tc-search__input:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.35);
+    outline-offset: 1px;
+}
+@media (max-width: 767.98px) {
+    .sticky-tc-search__input {
+        max-width: none;
+    }
+}
+
+
+/* ── While Categories is on ───────────────────────────────────────
+   The toolbar is down to the view switcher alone, so the hairline to
+   its left has nothing left to separate. */
+body.sticky-tc-on div:has(> .filtered-list-toolbar)::before {
+    display: none;
+}
+
+/* The search field and the category tabs line up with the view
+   switcher above them, which Stash centres. */
+.sticky-tc-search {
+    display: flex;
+    justify-content: center;
+}
+
+
+/* ── Tabs and search, one row ──────────────────────────────────────
+   The tabs used to be a segmented pill on wide screens and plain
+   underlined text on a phone. The phone version reads better at both
+   sizes, so it is now the only version — and the search sits beside
+   it rather than above, narrow enough not to dominate the row. */
+.sticky-tc-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-bottom: 0.25rem;
+}
+.sticky-tc-tabs {
+    display: flex;
+    gap: 1.1rem;
+    width: auto;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+}
+.sticky-tc-tab {
+    padding: 0.4rem 0;
+    border-radius: 0;
+    font-size: 1.15rem;
+}
+.sticky-tc-tab:hover:not(:disabled),
+.sticky-tc-tab.is-active {
+    background: transparent;
+}
+.sticky-tc-tab.is-active {
+    color: #fff;
+    box-shadow: inset 0 -2px 0 #fff;
+}
+.sticky-tc-tab__count {
+    font-size: 0.85rem;
+}
+.sticky-tc-tab.is-muted {
+    margin-left: 0;
+}
+.sticky-tc-search {
+    display: block;
+    margin: 0;
+}
+.sticky-tc-search__input {
+    width: 15rem;
+    max-width: 100%;
+    height: 2.2rem;
+}
+
+/* ── The counts down the right-hand side ──────────────────────────
+   "4 tags · 2 categories" beside every heading was more furniture
+   than information — the tabs and the sidebar already carry the
+   numbers. */
+.sticky-tc-meta {
+    display: none !important;
+}
+
+@media (max-width: 767.98px) {
+    /* Stacked, search on top, both full width */
+    .sticky-tc-controls {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: 0.8rem;
+    }
+    .sticky-tc-search__input {
+        width: 100%;
+        height: 2.4rem;
+    }
+}

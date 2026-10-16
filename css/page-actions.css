@@ -1,0 +1,175 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — the action row on detail pages   (page-actions.js)
+
+       ···   Meta IDs   Edit   │   ♥  ✓  🔗  𝕏  ◎
+
+   One look on the performer, studio, group and tag pages. The
+   hairline is the same as the one between the toolbar's filter group
+   and its view buttons. Menus open downwards, over the tabs, and
+   scroll if they're long (23 links on one performer).
+   ─────────────────────────────────────────────────────────────────── */
+
+.sticky-act-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+.sticky-act-icons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+.sticky-act-sep {
+    align-self: center;
+    width: 1px;
+    height: 1.45rem;
+    margin: 0 0.35rem;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* Buttons: outlined text buttons; icon buttons filled and square */
+.sticky-act-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    height: 2.4rem;
+    min-width: 2.4rem;
+    padding: 0 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text-muted) !important;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: color var(--ease), background-color var(--ease);
+}
+.sticky-act-button:hover {
+    background: var(--control-bg);
+    color: var(--text) !important;
+}
+.sticky-act-button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+}
+.sticky-act-icon {
+    width: 2.4rem;
+    padding: 0;
+    border-color: transparent;
+    background: var(--control-bg);
+    letter-spacing: 0.05em;
+}
+.sticky-act-icon svg {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    margin: 0 !important;
+}
+/* Favourite and organised, when on */
+.sticky-act-heart.is-on {
+    color: #f2a7c7 !important;
+}
+.sticky-act-organized.is-on {
+    color: #8fd6a4 !important;
+}
+
+/* Menus (colours from menus.css) */
+.sticky-act-menu-wrap {
+    position: relative;
+}
+.sticky-act-menu:not([hidden]) {
+    display: block !important;
+    position: absolute !important;
+    top: calc(100% + 0.4rem) !important;   /* Bootstrap's dropdown sets */
+    left: auto !important;                  /* its own top/left        */
+    right: 0 !important;
+    bottom: auto !important;
+    transform: none !important;
+    min-width: 13rem;
+    max-width: min(22rem, 90vw);
+    max-height: 50vh;
+    overflow-y: auto;
+    z-index: 1050;
+}
+.sticky-act-menu.sticky-act-menu--up:not([hidden]) {
+    top: auto !important;
+    bottom: calc(100% + 0.4rem) !important;
+}
+.sticky-act-menu[hidden] {
+    display: none !important;
+}
+.sticky-act-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    border: 0;
+    text-align: left;
+    text-decoration: none !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sticky-act-menu .sticky-act-danger {
+    color: #ff7a7a !important;
+}
+.sticky-act-ext {
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+
+/* Phones: the icons lead on the left and the buttons sit on the
+   right, with no hairline. When there are too many to share a line,
+   the icons keep the first line and the buttons drop below, still on
+   the right — rather than a hairline left dangling at a line's end. */
+@media (max-width: 767.98px) {
+    .sticky-act-icons {
+        order: -1;
+        margin-right: auto;
+    }
+    .sticky-act-sep {
+        display: none;
+    }
+    .sticky-act-button {
+        padding: 0 0.8rem;
+    }
+    .sticky-act-icon {
+        width: 2.3rem;
+        min-width: 2.3rem;
+        padding: 0;
+    }
+}
+
+/* AKA line under a name: first two, then "+N" */
+.sticky-aka {
+    margin-top: 0.35rem;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+.sticky-aka-more {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Outline icons; favourite and organised fill in when on */
+.sticky-act-icon svg[fill="none"] {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+.sticky-act-toggle.is-on svg[fill="none"] {
+    fill: currentColor;
+}
+.sticky-act-organized.is-on svg[fill="none"] {
+    fill: none;
+}

@@ -1,0 +1,152 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — group cards (mirrors the scene cards)   (group-cards.js)
+
+   cover (16:9), Stash's counts bottom right
+   studio logo · "Dec 2024"
+   title, two lines tall
+   synopsis, 2 lines
+   tag pills ("+N" opens the rest on the card)
+
+   The layout is shared with scene cards (cards.css). Stash's own
+   date is hidden only when ours is there.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── The grid ─────────────────────────────────────────────────────
+   Stash sizes each card with an inline width worked out per card
+   type, and its figure for groups is much narrower than for scenes,
+   which is why a lone group card looked thin. On the groups list the
+   row becomes a proper grid and the cards fill their columns, so
+   they match every other page. Carousels elsewhere are untouched. */
+div:has(> .filtered-list-toolbar) > .row:has(> .group-card) {
+    display: grid !important;
+    /* Columns capped at 300px and the set centred, so a part-filled
+       row sits in the middle like every other page. */
+    /* Stash makes group cards narrower than every other kind, which
+       shows the moment you flip from Galleries to Groups. Same cap as
+       a gallery or scene card gets at the default zoom. */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 340px));
+    justify-content: center;
+    gap: 1.25rem;
+    /* The Bootstrap row sits 15px outside the page on desktop; without
+       this the first card ran off the left edge. */
+    padding-inline: 15px;
+}
+div:has(> .filtered-list-toolbar) > .row > .group-card.card {
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+/* ── Card ─────────────────────────────────────────────────────────── */
+.group-card.card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--card-radius) !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    transition: background-color var(--ease), border-color var(--ease);
+}
+.group-card.card:hover {
+    background: var(--card-bg-hover) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Cover: a poster, whole, at a fixed shape so a row lines up */
+.group-card .thumbnail-section,
+.group-card .group-card-header {
+    display: block;
+    height: auto !important;
+}
+.group-card .group-card-image {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    aspect-ratio: 16 / 9;      /* same shape as the marker cards */
+    object-fit: cover;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+/* ── Body (column, gap, title: cards.css) ─────────────────────────── */
+.group-card .card-section:has(.sticky-date) .group-card__date {
+    display: none !important;
+}
+/* "Scene #2" / the containing group's note, on a sub-group's card */
+.sticky-gc-note {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+.sticky-gc-note hr {
+    display: none;
+}
+.sticky-gc-note:empty {          /* not in a containing group */
+    display: none;
+}
+.group-card .group-card__description {
+    -webkit-line-clamp: 2 !important;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.74);
+}
+
+/* ── Footer: tag pills ────────────────────────────────────────────── */
+/* Closed: the tags stay on one line, so a long name is trimmed rather
+   than pushing the "+N" onto a line of its own. Open: they wrap. */
+.group-card .sticky-pills--tag {
+    flex-wrap: nowrap;
+    min-width: 0;
+}
+.group-card .sticky-pills--tag .sticky-pill--tag {
+    min-width: 0;
+}
+.group-card .sticky-pills--tag.is-open {
+    flex-wrap: wrap;
+    row-gap: 6px;
+}
+/* "+N" and "−" are buttons here, so they need the pill's own shape */
+.group-card button.sticky-pill--more {
+    padding: 4px 10px;
+    font-family: inherit;
+    line-height: 1.2;
+    cursor: pointer;
+}
+.group-card button.sticky-pill--more:hover {
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Phones ───────────────────────────────────────────────────────── */
+/* One card per row, full width, like scenes, markers and galleries */
+@media (max-width: 575.98px) {
+    div:has(> .filtered-list-toolbar) > .row:has(> .group-card) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 10px;
+        padding-inline: 5px;    /* same edges as the scene cards */
+    }
+    /* Footer and counts are hidden on phones, so the body closes the
+       card with the same 14px as a scene card. Stash's own 1rem under
+       the card, and the date's gap meant for the tags below it, had
+       stacked up to 25px. */
+    .group-card.card {
+        padding-bottom: 0 !important;
+    }
+    .group-card .card-section {
+        padding: 14px var(--card-pad) 14px !important;
+    }
+}
+
+/* ── The same width in the home page's carousels ──────────────────
+   Stash hands group cards a narrower width than every other kind
+   everywhere, not only in the list: on the home page a group card is
+   240px against a scene or gallery card's 320px, which is what makes
+   the Groups row look pinched next to the others. */
+.recommendation-row .group-card.card {
+    width: 320px !important;
+    max-width: 320px !important;
+}

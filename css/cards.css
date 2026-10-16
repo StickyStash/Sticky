@@ -1,0 +1,652 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — scene cards
+
+   Scene, gallery, group and marker cards share one layout, top to
+   bottom (scene-cards.js, gallery-cards.js, group-cards.js,
+   marker-cards.js):
+     thumbnail   duration top right, Stash's counts bottom right
+     studio logo · "Aug 2021"
+     title, always two lines tall
+     "Performer One, Performer Two +3"
+     synopsis, 2 lines
+     tag pills
+
+   Old pieces (counts, logo overlay, date) are hidden only when the
+   script's replacement is actually on the card (:has checks), so if
+   the script ever fails, the card still shows everything.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Card ─────────────────────────────────────────────────────────── */
+.scene-card.card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--card-radius) !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    transition: background-color var(--ease), border-color var(--ease);
+}
+.scene-card.card:hover {
+    background: var(--card-bg-hover) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* ── Thumbnail overlays ───────────────────────────────────────────── */
+/* Resolution removed; duration becomes a small dark badge */
+.scene-card .overlay-resolution {
+    display: none !important;
+}
+/* Duration: top right, so the bottom right is free for the counts */
+/* A flex row, so the badge is its own box rather than a line of text
+   inside one, and sits exactly 10px down at the counts' height. */
+:is(.scene-card, .scene-marker-card) .scene-specs-overlay {
+    display: flex;
+    top: 10px !important;
+    bottom: auto !important;
+    right: 8px !important;
+}
+.scene-card .overlay-duration {
+    background: rgba(0, 0, 0, 0.72);
+    color: var(--text);
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.4;          /* same height as the counts badge */
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-shadow: none;
+}
+
+/* Watch progress: thin grey bar along the bottom of the thumbnail */
+.scene-card .progress-bar {
+    bottom: 0 !important;      /* Stash's 5px matched a margin removed below */
+    height: 4px !important;
+    background: var(--progress-track) !important;
+}
+.scene-card .progress-bar .progress-indicator {
+    height: 100%;
+    background: var(--progress-fill) !important;
+}
+
+/* Stash draws the studio's logo over the thumbnail's corner. Every
+   card type the theme redraws shows the logo above the title instead,
+   so Stash's copy is hidden wherever that slot exists — keyed on the
+   slot itself, not on where the logo used to live (the footer), which
+   is how gallery and image cards ended up showing it twice when the
+   logo moved. */
+.card:has(.sticky-studio--top, .sticky-card-top) .studio-overlay {
+    display: none !important;
+}
+
+/* ── Body: studio → title → performers → date → synopsis ──────────
+   One flex column with a single gap, so every row of the card is the
+   same distance from the next and the card can be made shorter by
+   changing one number rather than five margins that have to be kept
+   in step. --card-row-gap is that number; the old per-row margins
+   below are zeroed so nothing doubles up. */
+.card-section:has(> .sticky-studio--top, > .sticky-card-top),
+:is(.scene-card, .gallery-card, .group-card, .scene-marker-card) .card-section {
+    --card-row-gap: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-row-gap);
+    padding: 14px var(--card-pad) 0 !important;
+}
+/* Stash gives this margin-top:auto, so a card stretched to its row's
+   tallest opened the spare height above the studio row. It belongs
+   above the footer instead. */
+:is(.scene-card, .gallery-card, .group-card, .scene-marker-card) .card-section {
+    margin-top: 0;
+}
+
+/* GridCard draws the title before it draws anything the theme adds,
+   so the logo is pulled above it here rather than moved in the
+   markup. */
+.card-section > .sticky-studio--top {
+    order: -1;
+    justify-content: flex-start;
+    width: auto;
+    max-width: 50%;
+    height: 16px;
+}
+.card-section > a {
+    order: 0;
+}
+
+/* ── The studio · date row ─────────────────────────────────────────
+   Always 16px tall, even with neither, so titles line up across a
+   row. The logo gives up width before the date does. */
+.card-section > .sticky-card-top {
+    order: -1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 16px;
+    min-width: 0;
+}
+/* In a row, a logo capped at max-width:100% of a box sized by that
+   same logo collapses to 0px wide. The cap goes on the image instead,
+   in rem: a wide logo still scales down whole rather than cropping. */
+.sticky-card-top > .sticky-studio--top {
+    flex: 0 0 auto;
+    justify-content: flex-start;
+    width: auto;
+    height: 16px;
+}
+.sticky-card-top > .sticky-studio--top img {
+    width: auto;
+    height: 100%;
+    max-width: 9.5rem;
+}
+.sticky-card-top > .sticky-date {
+    flex: 0 0 auto;
+    font-size: 0.85rem;
+    line-height: 1;
+    white-space: nowrap;
+}
+.sticky-card-top__dot {
+    flex: 0 0 auto;
+    color: rgba(255, 255, 255, 0.4);
+    line-height: 1;
+}
+
+/* ── Title: always two lines tall ─────────────────────────────────
+   A one-line title keeps the second line empty, so the performers,
+   synopsis and tags start at the same height on every card. */
+:is(.scene-card, .gallery-card, .group-card, .scene-marker-card) .card-section-title {
+    min-height: 2lh;
+    align-items: flex-start;   /* Stash's flex-aligned centres it */
+    margin: 0 !important;
+    font-size: 1.25rem !important;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+}
+:is(.scene-card, .gallery-card, .group-card, .scene-marker-card) .card-section > a,
+:is(.scene-card, .gallery-card, .group-card, .scene-marker-card) .card-section > a:hover {
+    color: var(--text);
+    text-decoration: none;
+}
+
+/* ── Performers: "Performer One, Performer Two +3" ─────────────────
+   One line. The names give way with an ellipsis; "+N" never does. */
+.sticky-names {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4em;
+    min-width: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.85);
+}
+.sticky-names__list {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.sticky-names > :not(.sticky-names__list) {
+    flex: 0 0 auto;
+}
+.sticky-names__name,
+.sticky-names__name:hover {
+    color: inherit !important;
+    text-decoration: none !important;
+}
+.sticky-names__name:hover {
+    color: var(--text) !important;
+}
+.sticky-names__more {
+    color: var(--text-muted);
+    white-space: nowrap;
+    cursor: default;
+}
+.sticky-names__tap .sticky-names__more {
+    cursor: pointer;
+}
+
+/* Stash spaces its details block itself (14px under a scene's); the
+   column's gap does that here. */
+:is(.scene-card__details, .gallery-card__details, .group-card__details) {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+/* The synopsis, like the title, always takes its two lines, so a
+   one-line synopsis doesn't leave its card's tags higher than its
+   neighbours'. */
+:is(.scene-card__description, .gallery-card__description, .group-card__description) {
+    min-height: 2lh;
+}
+/* Stash's details with nothing left in them (its date is hidden, the
+   synopsis is empty) would still take a row and a gap. */
+.scene-card .scene-card__details:not(:has(.scene-card__description)),
+.group-card .group-card__details:not(:has(.group-card__description)) {
+    display: none !important;
+}
+
+/* Shared pill row. Marker, gallery and image cards let these wrap. */
+.sticky-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Scene, gallery and marker cards keep every pill row to ONE line.
+   Two long names used to wrap onto a second line and push the rest of
+   the card down, so these rows don't wrap: the pills shrink instead.
+   Flex shrinks the longest one hardest, so a short name stays whole
+   while a long one is cut with an ellipsis — and "+N" never shrinks,
+   with the full names in its popover. */
+:is(.scene-card, .gallery-card, .scene-marker-card) .sticky-pills {
+    flex-wrap: nowrap;
+    align-items: center;
+    min-width: 0;
+}
+:is(.scene-card, .gallery-card, .scene-marker-card) .sticky-pills > a.sticky-pill {
+    flex: 0 1 auto;
+    min-width: 3.5rem;       /* never cut down to nothing */
+}
+/* HoverPopover puts "+N" in a box of its own */
+.sticky-more-wrap {
+    flex: 0 0 auto;
+    display: inline-flex;
+}
+.sticky-pills--performer {
+    margin: 0;
+}
+.sticky-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.88rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none !important;
+    transition: color var(--ease), background-color var(--ease), border-color var(--ease);
+}
+a.sticky-pill:hover {
+    color: var(--text);
+}
+.sticky-pill--performer {
+    background: var(--chip-bg);
+}
+a.sticky-pill--performer:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+/* Tag pills: outlined */
+.sticky-pill--tag {
+    border: 1px solid var(--chip-border);
+}
+a.sticky-pill--tag:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+/* "+N" */
+.sticky-pill--more {
+    background: transparent;
+    border: 1px dashed var(--chip-border);
+    cursor: default;
+}
+
+/* Small icons in the pills, drawn with masks so they follow text colour */
+.sticky-pill--performer::before,
+.sticky-pill--tag::before {
+    content: "";
+    flex-shrink: 0;
+    width: 0.88rem;
+    height: 0.88rem;
+    background-color: currentColor;
+}
+.sticky-pill--performer::before {
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.sticky-pill--tag::before {
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M2 3.5V11l10.5 10.5 8-8L10 3H2.5zM7 5.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M2 3.5V11l10.5 10.5 8-8L10 3H2.5zM7 5.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Stash's own date is hidden; this one is spaced by the card body's
+   own gap, like every other row. */
+.sticky-date {
+    display: block;
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.62);
+}
+.scene-card .card-section:has(.sticky-date) .scene-card__date {
+    display: none !important;
+}
+
+/* Synopsis: 2 lines (Stash sets 3 inline, hence !important) */
+.scene-card .scene-card__description {
+    -webkit-line-clamp: 2 !important;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.74);
+}
+
+/* ── Footer: tags on one row, studio + counts on the next ─────────── */
+/* margin-top:auto pins it to the bottom, so footers line up across a
+   row of cards even when synopses differ in length. */
+/* The synopsis used to end 30px above the tags — its own 14px
+   margin plus the footer's 16px of padding — which was the single
+   biggest gap on the card and the reason it ran so tall. The footer
+   now opens at the same 10px as every other row, and closes with
+   the 14px the body opens with, so the card is symmetrical top to
+   bottom. */
+.sticky-card-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin-top: auto;
+    padding: 10px var(--card-pad) 14px;
+}
+/* No tags: the empty footer only closes the card, with the same 14px
+   the body opens with. */
+:is(.scene-card, .gallery-card, .group-card, .scene-marker-card) .sticky-card-footer:empty {
+    padding: 0 0 14px;
+}
+
+/* ── Stash's counts, on the thumbnail (bottom right) ──────────────
+   The same dark badge as the duration. They sit outside the
+   thumbnail's link, so each keeps its own popover and click. The
+   tag and performer counts stay hidden: the card shows those in
+   full. Stash's "Scene #1" note and divider come along with the
+   buttons and are hidden too (the disc in the corner says it). */
+:is(.scene-card, .gallery-card, .group-card, .scene-marker-card) > .thumbnail-section {
+    position: relative;
+}
+/* Stash leaves 5px under the video preview, inside the thumbnail, so
+   badges measured from the thumbnail's bottom sat 5px lower on the
+   picture than the duration sits from its top. */
+:is(.scene-card, .scene-marker-card) .scene-card-preview {
+    margin-bottom: 0;
+}
+/* Stash pads the bottom of gallery and group cards; the footer closes
+   every card here, so they end like a scene card. */
+:is(.scene-card, .gallery-card, .group-card, .scene-marker-card).card {
+    padding-bottom: 0 !important;
+}
+.sticky-thumb-counts {
+    position: absolute;
+    right: 8px;
+    bottom: 10px;
+    z-index: 2;
+    display: flex;
+}
+.sticky-thumb-counts > :not(.card-popovers),
+.sticky-thumb-counts :is(.tag-count, .performer-count, .extra-scene-info) {
+    display: none !important;
+}
+/* (A card with nothing else to count gets no badge at all — decided
+   in the card scripts from the data, because a :has() test for it
+   here cost ~13ms of page-wide restyling on every React render.) */
+.sticky-thumb-counts .card-popovers {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin: 0 !important;
+    padding: 0 2px !important;
+    border: 0 !important;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.72);
+}
+/* Each button sits in a wrapper (Stash's popover trigger); as flex
+   boxes they carry no line of text, so the badge is the button's
+   height — the duration's — not the page's 21px line. */
+.sticky-thumb-counts .card-popovers > * {
+    display: flex;
+}
+.sticky-thumb-counts .btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    min-height: 0;
+    padding: 2px 4px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600;
+    line-height: 1.4 !important;
+    color: var(--text) !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 3px;
+    box-shadow: none !important;
+}
+.sticky-thumb-counts .btn:hover {
+    background: rgba(255, 255, 255, 0.14) !important;
+}
+.sticky-thumb-counts .btn svg {
+    width: 0.8rem;
+    height: 0.8rem;
+    margin: 0 !important;
+}
+
+.sticky-studio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 22px;
+    flex-shrink: 0;
+}
+.sticky-studio img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Stash's other card buttons (O-count, markers, copies…), small and
+   quiet on the right. Its performer/tag counts are hidden when the
+   pills replace them, along with its divider line. */
+.sticky-card-extras {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    overflow: hidden;
+}
+.sticky-card-extras hr,
+:is(.scene-card, .gallery-card, .group-card, .scene-marker-card):has(> .sticky-card-footer) > hr {
+    display: none !important;
+}
+.sticky-card-extras .card-popovers {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+.sticky-card-extras .btn {
+    padding: 2px 6px !important;
+    font-size: 0.88rem !important;
+    color: var(--text-muted) !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.sticky-card-extras .btn:hover {
+    color: var(--text) !important;
+}
+
+.scene-card:has(.sticky-scene-no) .scene-group-scene-number {
+    display: none !important;
+}
+
+/* ── Scene number within a group ──────────────────────────────────
+   A white disc in the thumbnail's top-left corner, set in the same
+   size as the card title so it reads as a label on the scene rather
+   than another small count. */
+.sticky-scene-no {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2em;
+    height: 2em;
+    padding: 0 0.45em;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+    color: var(--bg-0);
+    font-size: 1.25rem;          /* same as .card-section-title */
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+}
+
+/* ── "+N" popover: the names that didn't fit ──────────────────────── */
+.sticky-popover-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    max-width: 18rem;
+}
+.sticky-popover-list .sticky-pill {
+    max-width: 100%;
+}
+
+
+/* ── Performers and date ──────────────────────────────────────────
+   One wrapper, two shapes. On a desktop it is a column and the card
+   reads exactly as it did: performers, then the date beneath them.
+   On a phone it becomes a single line — performers on the left, date
+   pinned to the right — which buys back a row of height on every
+   card in the list. */
+.sticky-card-line {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--card-row-gap, 10px);
+    min-width: 0;
+}
+.sticky-card-line > .sticky-date {
+    margin: 0;
+}
+
+/* ── The tap-to-open performer row (phones) ───────────────────────
+   The row is cut off by the card's width rather than by a count, so
+   the last pill that fits is usually sliced in half. A mask fades
+   the final 2.5rem out instead of leaving a hard edge, which also
+   says "there is more here" without spending room on a "+N". */
+.sticky-pills-tap {
+    min-width: 0;
+    overflow: hidden;
+    cursor: pointer;
+}
+.sticky-pills-tap .sticky-pills {
+    flex-wrap: nowrap;
+}
+.sticky-pills-tap .sticky-pill {
+    flex: 0 0 auto;          /* keep each pill whole; the mask cuts */
+    max-width: none;
+    pointer-events: none;    /* the row is one tap target, not many */
+}
+/* The fade is always on. The row takes all the width left over
+   beside the date, so when the pills don't fill it the gradient
+   falls over empty space and nothing looks dimmed; when they do
+   overflow, the pill at the cut fades out. No measuring, and nothing
+   to keep in sync when the card is resized. */
+.sticky-pills-tap {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+}
+
+/* The bubble it opens. Stash's own popover class does the frame; this
+   only fixes the width and lets the names wrap. */
+.sticky-tap-popover {
+    max-width: min(20rem, calc(100vw - 2rem));
+}
+.sticky-tap-popover .sticky-popover-list {
+    max-width: none;
+}
+
+@media (max-width: 767.98px) {
+    .sticky-card-line {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.6rem;
+        width: 100%;
+    }
+    /* Zero width, and a zero flex basis, then grow. Left to size
+       itself the row is as wide as every performer pill laid end to
+       end, and that width travels all the way up: the card grows to
+       hold it, then Stash's .row (a flex item with min-width:auto)
+       grows to hold the card — a 558px card in a 489px window, with
+       the whole page scrolling sideways. Asking for no width at all
+       means the row contributes nothing to what the card needs and
+       simply takes what is left over beside the date, which is also
+       what gives the mask an edge to fade at. */
+    .sticky-card-line > .sticky-pills-tap,
+    .sticky-card-line > .sticky-pills {
+        width: 0;
+        flex: 1 1 0;
+        min-width: 0;
+    }
+    /* The date leads. It is a fixed, predictable width ("Jul 2026"),
+       so putting it first gives every card in the list a straight
+       left edge to read down, and leaves the performers — the part
+       that varies — to take whatever room is left and fade out where
+       it runs out. */
+    .sticky-card-line > .sticky-date {
+        order: -1;
+        flex: 0 0 auto;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    /* ── What a card shows on a phone ─────────────────────────────
+       A phone card is a thumbnail, the studio, the title and who is
+       in it (the counts stay, on the thumbnail, where they cost no
+       height). The synopsis and the tag row go:
+       they are the rows that read smallest and matter least at arm's
+       length, and dropping them is what lets two cards share a row
+       without the text shrinking any further. */
+    .scene-card .scene-card__details,
+    .gallery-card .gallery-card__details,
+    .image-card .card-section > .sticky-pills--tag,
+    .image-card .image-card__details,
+    .group-card .group-card__details,
+    .sticky-card-footer {
+        display: none !important;
+    }
+    .card-section:has(> .sticky-studio--top, > .sticky-card-top),
+    :is(.scene-card, .gallery-card, .group-card, .scene-marker-card) .card-section {
+        padding-bottom: 14px !important;
+    }
+}
+
+/* ── Phones: cards 10px wider than the screen ─────────────────────
+   At 576px and below Stash stops sizing cards in JavaScript (its
+   ScreenUtils.isMobile() is the media query `max-width: 576px`) and
+   its stylesheets give scene, marker, gallery and image cards
+   `width: 100%` instead. Each card also keeps its 5px margin either
+   side, so it comes out 10px wider than the row holding it. Chrome
+   and Brave quietly shrink it back to fit; Safari won't shrink a
+   card below the width of its widest content (the thumbnail), so
+   on an iPhone the card overflowed and the centred row cut 5px off
+   each edge. Sizing the card to the row minus its margins, and
+   letting it go narrower than its content, removes the overflow in
+   every browser rather than relying on one of them to fix it up. */
+@media (max-width: 576px) {
+    .row > :is(.scene-card, .scene-marker-card, .gallery-card, .image-card).card {
+        width: calc(100% - 10px) !important;
+        max-width: calc(100% - 10px) !important;
+        min-width: 0 !important;
+    }
+    .grid-card :is(img, video) {
+        min-width: 0;
+        max-width: 100%;
+    }
+}

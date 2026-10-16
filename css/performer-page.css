@@ -1,0 +1,449 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — performer page header
+
+   Stash's own controls (name, favourite, links, rating, collapse
+   arrow) are restyled in place. The details below them are drawn by
+   performer-page.js (.sticky-pp); Stash's plain list, alias line and
+   button row are hidden only while that panel exists.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Spacing ──────────────────────────────────────────────────────
+   One scale for the whole header, so every gap is one of three steps:
+     --pp-xs   label → value, name → aliases
+     --pp-sm   between rows inside a section, list headings
+     --pp-md   around each section (above and below every divider) */
+.detail-header {
+    --pp-xs: 0.3rem;
+    --pp-sm: 0.75rem;
+    --pp-md: 1.25rem;
+}
+
+/* ── Page width ───────────────────────────────────────────────────
+   The details column stops at 1000px, so the whole performer page
+   (photo + details, the tabs, and the results under them) is capped
+   at the same overall width and centred, with no dead space. */
+body:has(.sticky-pp) {
+    --pp-details: 1000px;
+    --pp-page: calc(300px + 2rem + var(--pp-details));   /* photo + gap + details */
+}
+.detail-header:has(.sticky-pp) .detail-container,
+body:has(.sticky-pp) .nav-tabs,
+body:has(.sticky-pp) .tab-content {
+    max-width: var(--pp-page);
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+/* Switching tabs briefly empties the content while the new list
+   loads; the page got shorter than where you'd scrolled to, so the
+   browser jumped back up. Reserving a screen's height stops that. */
+body:has(.sticky-pp) .tab-content {
+    min-height: 100vh;
+}
+
+/* ── Frame ────────────────────────────────────────────────────────── */
+.detail-header:has(.sticky-pp) {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.detail-header:has(.sticky-pp) .detail-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    padding: 0.5rem 0 1.5rem;
+}
+.detail-header:has(.sticky-pp) .detail-container > .row {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+}
+/* Capped width: on wide screens three columns stretched so far apart
+   the eye had to travel across the page between related facts */
+.performer-head:has(> .sticky-pp) {
+    max-width: var(--pp-details);
+}
+/* The photo's width is set for every performer page, not only once
+   our header has rendered. Stash's own layout gives it a slightly
+   different width, so gating this on .sticky-pp meant the photo was
+   drawn at Stash's size for a moment and then visibly shrank as our
+   header took over. */
+.detail-header:has(.performer-head) .detail-header-image {
+    width: 300px;
+    max-width: 100%;
+}
+.detail-header:has(.sticky-pp) .detail-header-image {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;    /* photo on top, body map underneath */
+    align-items: center;
+}
+.detail-header:has(.sticky-pp) .detail-header-image > .btn {
+    width: 100%;
+}
+.detail-header:has(.sticky-pp) .detail-header-image .btn {
+    padding: 0;
+    border: 0;
+}
+/* Stash gives the photo an inline max-width of its own, so until our
+   width lands the photo is drawn a few pixels wider than its box and
+   then shrinks into place. Sizing it on every performer page, rather
+   than once our header exists, means it is the right size from the
+   first frame. */
+.detail-header:has(.performer-head) .detail-header-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: var(--card-radius);
+}
+.detail-header:has(.performer-head) .detail-header-image > .btn {
+    width: 100%;
+}
+
+/* Not needed: Stash's compact bar that pins to the top when you
+   scroll, and the expand/collapse arrow */
+.detail-header.sticky,
+.performer-head .detail-expand-collapse {
+    display: none !important;
+}
+
+/* Stash's originals, replaced by the panel (the name's icons only
+   once the action row has its own copies of them) */
+.performer-head:has(.sticky-act-icons) .name-icons,
+.performer-head:has(> .sticky-pp) > .detail-group,
+.performer-head:has(> .sticky-pp) .alias-head,
+.performer-head:has(> .sticky-pp) > .col:has(.details-edit) {
+    display: none !important;
+}
+
+/* ── Name row: name, then icon buttons on the right ───────────────── */
+.performer-head:has(> .sticky-pp) > h2 {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0 0 var(--pp-xs);
+}
+.performer-head:has(> .sticky-pp) .performer-name {
+    margin-right: auto;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text);
+}
+.performer-head:has(> .sticky-pp) .name-icons {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    order: 1;
+}
+.performer-head:has(> .sticky-pp) .detail-expand-collapse {
+    order: 2;
+}
+.performer-head:has(> .sticky-pp) > h2 .btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 2.3rem;
+    height: 2.3rem;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: var(--radius-sm) !important;
+    background: var(--control-bg) !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+    font-size: 0.95rem;
+    transition: color var(--ease), background-color var(--ease);
+}
+.performer-head:has(> .sticky-pp) > h2 .btn:hover {
+    background: var(--control-bg-hover) !important;
+    color: var(--text) !important;
+}
+.performer-head:has(> .sticky-pp) > h2 .btn svg {
+    display: block;
+    margin: 0 !important;
+    vertical-align: 0;
+}
+.performer-head:has(> .sticky-pp) > h2 .btn::after {
+    display: none;   /* Bootstrap's dropdown caret */
+}
+.performer-head:has(> .sticky-pp) > h2 .favorite-button.favorite {
+    color: #f2a7c7 !important;
+}
+.performer-head:has(.sticky-pp-ocount) .sticky-pp-ocount-source {
+    display: none !important;
+}
+.sticky-pp-ocount {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 2.3rem;
+    padding: 0 0.75rem;
+    border-radius: var(--radius-sm);
+    background: var(--control-bg);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Rating: small grey stars under the name */
+.performer-head:has(> .sticky-pp) .quality-group {
+    margin: 0 0 0.2rem;
+}
+.performer-head:has(> .sticky-pp) .rating-stars .btn {
+    padding: 0 0.1rem !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+    font-size: 0.9rem;
+}
+
+/* ── Panel ────────────────────────────────────────────────────────── */
+.sticky-pp {
+    color: var(--text);
+}
+.sticky-pp-aliases {
+    margin: 0 0 var(--pp-sm);
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+.performer-head:has(> .sticky-pp) .quality-group {
+    margin: 0 0 var(--pp-md) !important;
+}
+.sticky-pp-section {
+    padding: var(--pp-md) 0;
+    border-top: 1px solid var(--surface-border);
+}
+.sticky-pp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--pp-md) 1.5rem;
+}
+.sticky-pp-label {
+    margin-bottom: var(--pp-xs);
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+}
+.sticky-pp-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+.sticky-pp-inline .sticky-pp-value {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+.sticky-pp-value .fi {
+    width: 1.2em;
+    height: 0.9em;
+    border-radius: 2px;
+    background-size: cover;
+}
+.sticky-pp-muted {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.62);
+}
+.sticky-pp-dot-sep {
+    margin: 0 0.4rem;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Tattoos & piercings ──────────────────────────────────────────── */
+.sticky-pp-marks-wrap {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));   /* same guides as the facts */
+    gap: var(--pp-md) 1.5rem;
+}
+.sticky-pp-marks-group--tattoo {
+    grid-column: 1 / span 2;
+}
+.sticky-pp-marks-group--piercing {
+    grid-column: 3;
+}
+.sticky-pp-marks-group:only-child {
+    grid-column: 1 / -1;
+}
+.sticky-pp-marks-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-bottom: var(--pp-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+}
+.sticky-pp-key {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+}
+.sticky-pp-key--tattoo   { background: var(--mark-colour); }
+.sticky-pp-key--piercing { border: 1.5px solid var(--mark-colour); }
+.sticky-pp-marks {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.sticky-pp-marks li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    padding: var(--pp-xs) 0;
+    font-size: 0.95rem;
+}
+.sticky-pp-mark-label {
+    min-width: 1.3rem;
+    font-weight: 700;
+    color: var(--mark-colour);
+}
+.sticky-pp-mark-where { color: rgba(255, 255, 255, 0.62); }
+.sticky-pp-mark-what  { color: rgba(255, 255, 255, 0.85); font-weight: 400; }
+
+/* Body map under the photo */
+.sticky-pp,
+.sticky-pp-map {
+    --mark-colour: #8fb8e8;   /* soft blue, from the page palette */
+}
+.sticky-pp-map {
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+}
+.sticky-pp-figure {
+    width: 100px;
+    margin: 0;
+    text-align: center;
+}
+.sticky-pp-figure svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+.sticky-pp-figure figcaption {
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+.sticky-pp-body > * {
+    fill: rgba(255, 255, 255, 0.1);
+}
+.sticky-pp-dot--tattoo {
+    fill: var(--mark-colour);
+}
+.sticky-pp-dot--piercing {
+    fill: var(--bg-0);
+    stroke: var(--mark-colour);
+    stroke-width: 0.9;
+}
+.sticky-pp-dot-label {
+    font-size: 5.2px;
+    font-weight: 700;
+    text-anchor: middle;
+}
+.sticky-pp-dot-label--tattoo   { fill: var(--bg-0); }
+.sticky-pp-dot-label--piercing { fill: var(--mark-colour); }
+
+/* ── Tags, bio ────────────────────────────────────────────────────── */
+.sticky-pp-tags {
+    margin-top: var(--pp-xs);
+}
+.sticky-pp-bio {
+    margin: var(--pp-xs) 0 0;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.74);
+    white-space: pre-line;
+}
+
+/* ── Collapsible toggles (Other details) ─────────────────────────── */
+.sticky-pp-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.sticky-pp-toggle::before {
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(-45deg);
+    transition: transform var(--ease);
+}
+.sticky-pp-toggle[aria-expanded="true"]::before {
+    transform: rotate(45deg);
+}
+.sticky-pp-toggle:hover {
+    color: var(--text);
+}
+.sticky-pp-other-grid {
+    margin-top: var(--pp-md);
+}
+
+/* ── Footer ───────────────────────────────────────────────────────── */
+.sticky-pp-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding-top: var(--pp-md);
+    border-top: 1px solid var(--surface-border);
+}
+/* The row takes the footer's full width (its contents sit to the
+   right; on phones the icons lead on the left) */
+.sticky-pp-footer > .sticky-act-bar {
+    flex: 1 1 auto;
+}
+
+/* ── Smaller screens ──────────────────────────────────────────────── */
+/* Body map only where there's room for it beside the details */
+@media (max-width: 991.98px) {
+    .sticky-pp-map {
+        display: none !important;
+    }
+}
+@media (max-width: 767.98px) {
+    .detail-header:has(.sticky-pp) .detail-container {
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    .detail-header:has(.sticky-pp) .detail-header-image {
+        max-width: 100%;
+        align-self: center;
+    }
+    .detail-header:has(.sticky-pp) .detail-header-image img {
+        max-height: 60vh;
+        margin: 0 auto;
+    }
+    .sticky-pp-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .sticky-pp-marks-wrap {
+        grid-template-columns: 1fr;
+    }
+    .sticky-pp-marks-group--tattoo,
+    .sticky-pp-marks-group--piercing {
+        grid-column: 1 / -1;
+    }
+    .performer-head:has(> .sticky-pp) .performer-name {
+        font-size: 1.6rem;
+    }
+}
+
+
+/* Disambiguation (" (2021)" after the name) isn't shown */
+.performer-head .performer-disambiguation {
+    display: none !important;
+}

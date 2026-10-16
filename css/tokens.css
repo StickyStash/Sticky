@@ -1,0 +1,170 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — design tokens
+   Every other file pulls its colours, sizes and radii from here.
+   ─────────────────────────────────────────────────────────────────── */
+
+:root {
+    /* Surfaces */
+    --bg-0: #0d1520;   /* page background: deep muted blue */
+    --bg-2: #141414;   /* raised: menus, tiles        */
+    --bg-3: #1f1f1f;   /* hover on raised surfaces    */
+
+    /* Page gradient: a richer blue at the top of the page, fading
+       into the deep blue base colour (--bg-0) that the rest of the
+       page sits on. It scrolls away with the page. */
+    --gradient-top: #1f3350;     /* richer slate blue */
+    --gradient-mid: #122032;     /* in-between        */
+    --gradient-height: 90vh;     /* how far down the fade reaches */
+
+    --border: rgba(255, 255, 255, 0.08);
+
+    --text: rgba(255, 255, 255, 0.95);
+    --text-muted: rgba(255, 255, 255, 0.65);
+
+    /* Selected-item pill (Netflix style: translucent white) */
+    --pill-active: rgba(255, 255, 255, 0.22);
+    --pill-hover: rgba(255, 255, 255, 0.08);
+
+    /* Navbar */
+    --nav-height: 5rem;          /* desktop/tablet bar height; the menu
+                                    is centred inside it and the page
+                                    starts right below it */
+    --nav-font-size: 1.2rem;     /* menu text size */
+    --page-gap: 1rem;            /* extra space between the navbar and
+                                    the page content (desktop/tablet) */
+    --nav-blur: 32px;
+
+    /* Phone bottom bar */
+    --tabbar-height: 4.8rem;
+    --tabbar-gap: 0.75rem;       /* space around the floating bar */
+    --tabbar-icon-size: 2rem;
+    --tabbar-more-icon: 1.45rem; /* icons in the More panel */
+    --tabbar-pill-w: 4.6rem;     /* the selected page's pill */
+    --tabbar-pill-h: 3.6rem;
+
+    /* Dropdown menus: a solid colour matching what the translucent
+       toolbar buttons (Date, Filters…) look like on the page blue.
+       (A translucent menu would let cards show through it.) */
+    --surface-solid: #34455e;
+    --surface-border: rgba(255, 255, 255, 0.1);
+    --control-bg: rgba(255, 255, 255, 0.08);   /* toolbar button fill */
+    --control-bg-hover: rgba(255, 255, 255, 0.14);
+
+    /* Cards */
+    --card-bg: rgba(255, 255, 255, 0.04);      /* faint white over black */
+    --card-bg-hover: rgba(255, 255, 255, 0.06);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-radius: 12px;
+    --card-pad: 16px;
+    --chip-bg: rgba(255, 255, 255, 0.08);      /* performer pills */
+    --chip-border: rgba(255, 255, 255, 0.16);  /* tag pill outline */
+    --progress-track: rgba(255, 255, 255, 0.12);
+    --progress-fill: var(--text-muted);        /* same grey as unselected
+                                                  navbar text */
+
+    /* Accent: not used yet, kept for later pieces */
+    --accent: #f97316;
+    --accent-bright: #fb923c;
+    --accent-rgb: 249, 115, 22;
+
+    /* Shape */
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-pill: 9999px;
+
+    --ease: 150ms ease;
+
+    /* Chevrons, drawn once here and used as masks so they take the
+       colour of whatever draws them (carousel arrows, page switcher). */
+    --sticky-chev-left: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 5l-7 7 7 7'/%3E%3C/svg%3E");
+    --sticky-chev-right: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 5l7 7-7 7'/%3E%3C/svg%3E");
+}
+
+/* Richer blue at the top of the page, fading into the deep blue base.
+   The gradient is one screen tall and scrolls with the page; below it
+   the page stays the base blue, never black.
+
+   It lives on <html>, not <body>. A background on <html> is the one
+   that paints the browser's canvas — the strip behind an iPhone's
+   status bar when the page runs full-bleed, the area a rubber-band
+   scroll uncovers, and the colour Safari samples to tint its own bars
+   when website tinting is on. With the gradient on <body> instead,
+   <html>'s flat --bg-0 (#0D1520) was painting all of that, so the top
+   of the screen was two shades darker than the top of the page
+   (#1F3350) right below it. */
+html {
+    /* The plain colour behind everything. On an iPhone this is also
+       the colour Safari paints its status bar with — see the iOS rule
+       just below this block. */
+    background-color: var(--bg-0);
+    background-image:
+        linear-gradient(to bottom,
+            var(--gradient-top) 0%,
+            var(--gradient-mid) 45%,
+            var(--bg-0) 100%),
+        /* Solid dark navy from where the gradient ends to the bottom
+           of the page — and on past it, so a rubber-band scroll at the
+           bottom still shows dark navy rather than the top colour. */
+        linear-gradient(var(--bg-0), var(--bg-0));
+    background-size: 100% var(--gradient-height), 100% 100%;
+    background-position: 0 0, 0 var(--gradient-height);
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    /* Keep the scrollbar's strip of space reserved at all times.
+       Without this, a page is briefly short enough to need no
+       scrollbar while it loads, then gains one when the results
+       arrive — and everything measured against the window width
+       jumps sideways at that moment: the floating tab bar shifts and
+       narrows, and a performer's photo shrinks a few pixels. */
+    scrollbar-gutter: stable;
+}
+
+/* iPhone and iPad Safari: the status bar takes <html>'s background-
+   color and ignores both theme-color and any gradient painted over it
+   (tested with Web Inspector: setting this to red turned the bar red;
+   changing theme-color did nothing). So there it is the gradient's top
+   colour, to match the top of the page, and the dark navy below the
+   gradient comes from the second image layer above, so the page looks
+   the same. -webkit-touch-callout exists only in iOS WebKit, which
+   keeps this away from desktop browsers: there, an always-visible
+   scrollbar's track shows this plain colour rather than the gradient,
+   and the light navy made a strip down the right edge that didn't
+   darken with the page. */
+@supports (-webkit-touch-callout: none) {
+    html {
+        background-color: var(--gradient-top);
+    }
+}
+/* Transparent, so <html>'s gradient above shows through — Stash sets
+   its own flat colour here, hence the !important. */
+body {
+    background: transparent !important;
+    color: var(--text);
+}
+
+/* Scrollbars everywhere: a slim thumb in the search-field colour on a
+   clear track, instead of the system's black one. */
+html,
+* {
+    scrollbar-width: thin;                                        /* Firefox, new Chrome */
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+::-webkit-scrollbar {                                             /* Safari, older Chrome */
+    width: 10px;
+    height: 10px;
+    background: transparent;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    border: 2px solid transparent;     /* inset so it looks slimmer */
+    background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.32);
+    background-clip: padding-box;
+}

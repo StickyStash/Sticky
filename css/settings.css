@@ -1,0 +1,245 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — Settings
+
+   Settings was the one area the theme had never touched, so it still
+   showed Bootstrap's defaults: #007bff tabs, toggles and buttons, and
+   flat #30404d cards with pure-black 1px dividers. Everything here
+   swaps those for the same surfaces, radii and translucent-white
+   states the rest of the theme uses. No element is moved or rebuilt —
+   this file only repaints what Stash already draws.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Where the page sits ──────────────────────────────────────────
+   Stash fixes the settings menu to the left edge, then pushes the
+   content column right by the menu's two grid columns to clear it.
+   Because the menu is out of the flow, that push is applied on top of
+   a column that already starts at the container's left edge, so the
+   780px content block ends up roughly 100px right of the middle of
+   the window while every other page in the theme is centred on it.
+   Dropping the push lets Stash's own .mx-auto centre the block on the
+   window. Only from 1280px up, where the 780px block clears the fixed
+   menu with room to spare; below that the push is still doing real
+   work and is left alone. */
+@media (min-width: 1280px) {
+    #settings-container {
+        margin-left: 0 !important;
+    }
+}
+/* Bootstrap gives every column position:relative, so once the content
+   column starts at the container's left edge it is a positioned box
+   sitting after the fixed menu in the markup — and with neither
+   carrying a z-index, the later one wins and swallows every click
+   aimed at Tasks, Library, Interface and the rest. Lifting the menu
+   puts it back on top. Above 1280px the 780px content block starts
+   clear of the menu, so nothing visible overlaps; the two only meet
+   at 1200px and below, where the column's own offset is left in
+   place. */
+#settings-menu-container {
+    z-index: 3;
+}
+
+/* ── The left-hand menu ───────────────────────────────────────────
+   Bootstrap's nav-pills paint the current tab solid #007bff. Use the
+   same translucent-white pill the navbar uses for the current page,
+   so "where am I" looks the same in both places. */
+#settings-menu-container .nav-pills .nav-link {
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    padding: 0.45rem 0.8rem;
+    transition: background-color var(--ease), color var(--ease);
+}
+#settings-menu-container .nav-pills .nav-link:hover {
+    background-color: var(--pill-hover);
+    color: var(--text);
+}
+#settings-menu-container .nav-pills .nav-link.active,
+#settings-menu-container .nav-pills .show > .nav-link {
+    background-color: var(--pill-active);
+    color: var(--text);
+    font-weight: 600;
+}
+#settings-menu-container .advanced-switch {
+    color: var(--text-muted);
+    padding: 0.75rem 0.8rem 0;
+}
+#settings-menu-container hr {
+    border-top-color: var(--border);
+}
+
+/* ── Section headings ─────────────────────────────────────────────
+   "Basic Settings", "Scene View" and the rest were Bootstrap's 2rem
+   h1. Bring them to the weight and size the theme uses elsewhere. */
+.setting-section h1 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 0.8rem;
+}
+.setting-section .sub-heading,
+#setting-dialog .sub-heading {
+    color: var(--text-muted);
+}
+
+/* ── The cards each group of settings sits in ─────────────────────
+   Same faint-white-over-blue surface, hairline and 12px corner as a
+   scene card, instead of the flat grey block. */
+.setting-section .card,
+#settings-container .card,
+#setting-dialog .card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+}
+
+/* Rows inside a card: Stash separates them with solid black, which
+   reads as a gap cut through the card. A hairline reads as a fold. */
+.setting-section .setting:not(:last-child),
+.setting-section .setting-group:not(:last-child) {
+    border-bottom: 1px solid var(--border);
+}
+.setting-section .setting h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+.setting-section .setting .sub-heading,
+.setting-section .setting > div:first-child > div:not(.value) {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+.setting-section .setting .value {
+    color: var(--text-muted);
+}
+.setting-section .setting-group-collapse-button {
+    color: var(--text-muted);
+}
+
+/* ── Switches ─────────────────────────────────────────────────────
+   Bootstrap's checked switch is solid #007bff. The theme has no blue
+   of its own to swap in — its "on" state everywhere else is white
+   over the page blue — so an on switch becomes a white track with a
+   deep-blue knob, which stays unambiguous next to the off state
+   without introducing a colour the theme doesn't otherwise use. */
+.custom-control-input ~ .custom-control-label::before {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.22);
+}
+.custom-switch .custom-control-input ~ .custom-control-label::after {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: rgba(255, 255, 255, 0.92);
+    border-color: rgba(255, 255, 255, 0.92);
+}
+.custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+    background-color: var(--bg-0);
+}
+/* A checkbox's tick is drawn as a background image in white, which
+   disappears on the white track; draw it in the page blue instead. */
+.custom-checkbox .custom-control-input:checked ~ .custom-control-label::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath fill='%230d1520' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/%3E%3C/svg%3E");
+}
+.custom-control-input:focus ~ .custom-control-label::before,
+.custom-control-input:focus:not(:checked) ~ .custom-control-label::before {
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 0.15rem rgba(255, 255, 255, 0.25);
+}
+.custom-control-input:disabled ~ .custom-control-label {
+    color: var(--text-muted);
+}
+
+/* Buttons, and the colours of fields, come from components.css */
+#settings-container .btn-link,
+#settings-container a:not(.btn) {
+    color: var(--text);
+    text-decoration-color: rgba(255, 255, 255, 0.35);
+}
+
+/* ── Text fields, selects and text areas ──────────────────────────
+   Same flat translucent field as the toolbar search. */
+#settings-container .form-control,
+#settings-container .input-control,
+#setting-dialog .form-control {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    box-shadow: none;
+    color: var(--text);
+}
+#settings-container .form-control:focus,
+#setting-dialog .form-control:focus {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.35);
+    box-shadow: none;
+    color: var(--text);
+}
+#settings-container select option {
+    background-color: var(--surface-solid);
+    color: var(--text);
+}
+
+/* ── Tables (scrapers, stash boxes, job queue, plugins) ───────────── */
+#settings-container table,
+#settings-container .table {
+    color: var(--text);
+}
+#settings-container .table td,
+#settings-container .table th,
+#settings-container .scraper-table td,
+#settings-container .scraper-table th {
+    border-color: var(--border);
+}
+/* Stash paints the header row solid #30404D, which reads as a grey
+   bar laid across the card rather than the top of a table. The
+   hairline under it is enough to separate it from the rows. */
+#settings-container thead,
+#settings-container .table thead,
+#settings-container .table thead tr,
+#settings-container .table thead th {
+    background-color: transparent;
+}
+#settings-container .table thead th {
+    border-bottom-color: var(--border);
+    color: var(--text-muted);
+    font-weight: 600;
+}
+#settings-container .scraper-table tr:nth-child(2n) {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* The Task Queue sits in an opaque #202B33 panel wrapped around the
+   card that already has the theme's surface, so it showed as a grey
+   block with a bordered box floating inside it. */
+.tasks-panel-queue {
+    background-color: transparent !important;
+    padding: 0;
+}
+
+/* ── Progress bars and the log view ──────────────────────────────── */
+#settings-container .progress {
+    background-color: var(--progress-track);
+    border-radius: var(--radius-pill);
+}
+#settings-container .progress-bar {
+    background-color: rgba(255, 255, 255, 0.8);
+}
+#settings-container .logs {
+    background-color: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-sm);
+}
+#settings-container .log-time {
+    color: var(--text-muted);
+}
+
+/* ── Phone ────────────────────────────────────────────────────────
+   The menu stops being fixed and stacks above the panels, so the
+   pills want to read as a list rather than a strip of buttons. */
+@media (max-width: 575.98px) {
+    #settings-menu-container .nav-pills .nav-link {
+        padding: 0.6rem 0.9rem;
+    }
+    .setting-section .setting {
+        padding: 12px;
+    }
+}

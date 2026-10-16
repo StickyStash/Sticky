@@ -1,0 +1,89 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — keyboard focus
+
+   Every control the theme restyles sets its own background and drops
+   Bootstrap's focus glow with it, so tabbing through the site moved
+   an invisible cursor: a tag pill, a toolbar button and a card link
+   all focused with `outline: none; box-shadow: none`, leaving nothing
+   on screen to say where you were. This file puts one ring back.
+
+   It is keyed on :focus-visible, not :focus, so the ring appears when
+   the browser judges the focus to have come from the keyboard and
+   never on a plain mouse click — which is why clicking a button
+   doesn't leave a ring stuck on it afterwards.
+
+   :focus-visible only ever matches something focusable, so the broad
+   selector below can't put a ring on an ordinary div.
+
+   Loaded last so it wins over the per-component focus rules.
+   ─────────────────────────────────────────────────────────────────── */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="option"]:focus-visible,
+.btn:focus-visible,
+.nav-link:focus-visible,
+.dropdown-item:focus-visible,
+.custom-control-input:focus-visible ~ .custom-control-label::before {
+    outline: 2px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 2px;
+    /* A soft dark halo so the white ring still reads when the control
+       sits on a pale photo — a performer card's portrait, a studio
+       logo — rather than on the page blue. */
+    box-shadow: 0 0 0 5px rgba(0, 0, 0, 0.45);
+}
+
+/* The ring follows the control's own shape wherever the control has
+   one, so it doesn't draw a square around a pill. */
+.sticky-pill:focus-visible,
+.sticky-tc-pill:focus-visible,
+.sticky-tab:focus-visible,
+.rounded-pill:focus-visible {
+    border-radius: var(--radius-pill);
+}
+
+/* Cards are focused through the link that wraps the whole tile; the
+   ring hugs the tile's corner rather than cutting across it. */
+.card:focus-visible,
+.card a:focus-visible,
+.grid-card:focus-visible {
+    border-radius: var(--card-radius);
+}
+
+/* Mouse and touch: no ring, and none of Bootstrap's blue glow either
+   — the theme's buttons say "pressed" with their own fill. */
+.btn:focus:not(:focus-visible),
+.nav-link:focus:not(:focus-visible),
+.dropdown-toggle:focus:not(:focus-visible),
+.form-control:focus:not(:focus-visible),
+.custom-control-input:focus:not(:focus-visible) ~ .custom-control-label::before {
+    box-shadow: none;
+}
+
+/* Skip the ring on a control that is only focusable because it is
+   scrollable — the tab strip on a phone, the Categories side list —
+   where a ring round the whole strip says nothing useful. */
+.sticky-tc-side:focus-visible,
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .nav-tabs:focus-visible {
+    box-shadow: none;
+    outline: none;
+}
+
+/* Text you type into a dropdown field (performers, tags, galleries …)
+   goes into a small input inside the field. Text inputs always count
+   as focus-visible, so the ring above drew a white outline and a dark
+   halo tight around that inner input: the black box under the text.
+   The field's own frame already shows it has focus. */
+.react-select__input-container input:focus-visible,
+.react-select__input:focus-visible,
+[class*="__input-container"] input:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}

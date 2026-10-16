@@ -1,0 +1,604 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — shared components
+
+   The pieces Stash reuses on every page: buttons, text fields,
+   dropdown fields (react-select), dialogs, the date picker, toasts,
+   tooltips, popovers, tables, badges and the error box. Each was
+   found still wearing Stash's stock palette by a scripted scan of
+   every surface — #137CBD buttons, #394B59 fields, #30404D dialog
+   bodies, #202B33 table headers, white checkboxes.
+
+   This file loads straight after tokens.css, before every page and
+   card stylesheet, so a component that already has its own look
+   (toolbar buttons, card pills, the navbar) keeps it: those rules are
+   more specific, or later, or both. What lands here is the default
+   for anything nobody had styled.
+
+   The Tagger is left out on purpose. Its search fields and buttons
+   are Bootstrap input groups that only look right in Stash's own
+   styling, and it was asked to stay that way.
+   ─────────────────────────────────────────────────────────────────── */
+
+:root {
+    /* A dialog-sized panel: deeper than the dropdown surface, which is
+       pitched to sit over cards, and lighter than the page. */
+    --panel-solid: #172437;
+    --field-bg: rgba(255, 255, 255, 0.08);
+    --field-bg-focus: rgba(255, 255, 255, 0.12);
+    --field-ring: rgba(255, 255, 255, 0.35);
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────
+   Primary — the action on a form or dialog: Save, Apply, Scrape —
+   is solid white on the page blue. Secondary matches the toolbar's
+   translucent buttons. The selectors repeat Bootstrap's own, state
+   for state, so each one outranks Bootstrap's by coming later rather
+   than by piling on specificity that would then beat the theme's own
+   component rules. :not(:where(…)) keeps the Tagger, the scrubber and
+   the navbar out without adding any weight. */
+.btn-primary:not(:where(.tagger-container, .scrubber-wrapper, nav.top-nav) *) {
+    background-color: rgba(255, 255, 255, 0.92);
+    border-color: transparent;
+    color: var(--bg-0);
+    font-weight: 600;
+}
+.btn-primary:not(:where(.tagger-container, .scrubber-wrapper, nav.top-nav) *):hover,
+.btn-primary:not(:where(.tagger-container, .scrubber-wrapper, nav.top-nav) *):focus,
+.btn-primary:not(:where(.tagger-container, .scrubber-wrapper, nav.top-nav) *):not(:disabled):not(.disabled):active,
+.btn-primary:not(:where(.tagger-container, .scrubber-wrapper, nav.top-nav) *):not(:disabled):not(.disabled).active {
+    background-color: #fff;
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--bg-0);
+}
+.btn-primary:not(:where(.tagger-container, .scrubber-wrapper, nav.top-nav) *):disabled,
+.btn-primary:not(:where(.tagger-container, .scrubber-wrapper, nav.top-nav) *).disabled {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-color: transparent;
+    color: var(--bg-0);
+}
+
+.btn-secondary:not(:where(.tagger-container) *) {
+    background-color: var(--control-bg);
+    border-color: transparent;
+    color: var(--text);
+}
+.btn-secondary:not(:where(.tagger-container) *):hover,
+.btn-secondary:not(:where(.tagger-container) *):focus,
+.btn-secondary:not(:where(.tagger-container) *):not(:disabled):not(.disabled):active,
+.btn-secondary:not(:where(.tagger-container) *):not(:disabled):not(.disabled).active {
+    background-color: var(--control-bg-hover);
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--text);
+}
+
+/* Disabled: Bootstrap's .btn-secondary:disabled outranks the base
+   rule above and repaints it #394B59 — the ⊘ "clear this field"
+   buttons in bulk edit are disabled until a field has a value. */
+.btn-secondary:not(:where(.tagger-container) *):disabled,
+.btn-secondary:not(:where(.tagger-container) *).disabled {
+    background-color: var(--control-bg);
+    border-color: transparent;
+    color: var(--text-muted);
+}
+
+/* Bulk edit's Overwrite / Add / Remove are three primary buttons in a
+   row with the chosen one marked .active. Three solid white buttons
+   would hide which is chosen, so here only the chosen one is solid. */
+.button-group-above > .btn-primary:not(.active) {
+    background-color: var(--control-bg);
+    color: var(--text-muted);
+}
+.button-group-above > .btn-primary:not(.active):hover {
+    background-color: var(--control-bg-hover);
+    color: var(--text);
+}
+
+.btn-link:not(:where(.tagger-container) *) {
+    color: var(--text);
+}
+
+/* ── Text fields, selects, text areas ─────────────────────────────
+   Colours only. Radius is deliberately left to Bootstrap: a field in
+   an .input-group is squared off where it meets its button, and an
+   8px radius on every field is exactly what broke the Tagger's joins
+   before. */
+.form-control:not(:where(.tagger-container) *):not([type="checkbox"]):not([type="radio"]),
+.input-control:not(:where(.tagger-container) *) {
+    background-color: var(--field-bg);
+    border-color: transparent;
+    color: var(--text);
+}
+.form-control:not(:where(.tagger-container) *):not([type="checkbox"]):not([type="radio"]):focus,
+.input-control:not(:where(.tagger-container) *):focus {
+    background-color: var(--field-bg-focus);
+    border-color: var(--field-ring);
+    box-shadow: none;
+    color: var(--text);
+}
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+select.form-control option,
+select.input-control option {
+    background-color: var(--surface-solid);
+    color: var(--text);
+}
+.input-group-text:not(:where(.tagger-container) *) {
+    background-color: var(--control-bg);
+    border-color: transparent;
+    color: var(--text-muted);
+}
+
+/* Stash gives some checkboxes the form-control class (the list view's
+   row ticks), and Bootstrap paints every form-control white — 40
+   white squares down the left of a scene list. Clear the paint and let
+   the native box show, tinted to the theme. */
+input[type="checkbox"].form-control,
+input[type="radio"].form-control {
+    background-color: transparent;
+    border: 0;
+    box-shadow: none;
+    accent-color: #fff;
+}
+
+/* ── Dropdown fields (react-select) ───────────────────────────────
+   Studio, Performers, Tags, Groups in every edit form and bulk-edit
+   dialog. Stash paints these #394B59 with div.react-select__control,
+   and react-select adds its own runtime styles on top, so these use
+   the same element-qualified selectors and come later. */
+div.react-select__control:not(:where(.tagger-container) *) {
+    background-color: var(--field-bg);
+    border-color: transparent;
+    box-shadow: none;
+    border-radius: var(--radius-sm);
+}
+div.react-select__control--is-focused:not(:where(.tagger-container) *),
+div.react-select__control--menu-is-open:not(:where(.tagger-container) *) {
+    background-color: var(--field-bg-focus);
+    border-color: var(--field-ring);
+    box-shadow: none;
+}
+div.react-select__control:hover {
+    border-color: var(--field-ring);
+}
+div.react-select__placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+div.react-select__single-value,
+div.react-select__input-container {
+    color: var(--text);
+}
+div.react-select__indicator {
+    color: var(--text-muted);
+}
+div.react-select__indicator:hover {
+    color: var(--text);
+}
+span.react-select__indicator-separator {
+    background-color: var(--border);
+}
+/* The chosen items inside a multi-select: the theme's pills. Stash
+   sets their #BFCCD6 fill from inside the control
+   (div.react-select__control .react-select__multi-value), so this
+   nests the same way to outrank it. */
+div.react-select__control div.react-select__multi-value,
+div.react-select__multi-value {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-pill);
+    color: var(--text);
+}
+div.react-select__multi-value__label {
+    color: var(--text);
+    padding-left: 0.55rem;
+}
+div.react-select__multi-value__remove {
+    border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+    color: var(--text-muted);
+}
+div.react-select__multi-value__remove:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+    color: #fff;
+}
+/* The list that opens: same surface as every other dropdown menu */
+div.react-select__menu {
+    background: var(--surface-solid);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+}
+div.react-select__menu-list {
+    padding: 0.35rem;
+}
+div.react-select__option {
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    background: transparent;
+}
+div.react-select__option--is-focused {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+}
+div.react-select__option--is-selected {
+    background-color: var(--pill-active);
+    color: #fff;
+}
+div.react-select__menu-notice {
+    color: var(--text-muted);
+}
+
+/* ── Dialogs ──────────────────────────────────────────────────────
+   Every modal in Stash: bulk edit, merge, delete, generate, identify,
+   scrape. Stash paints the header, body and footer #30404D separately
+   inside a borderless shell; here the shell is the panel and its parts
+   are clear, divided by hairlines. */
+.modal-backdrop.show {
+    background-color: rgb(5, 10, 18);
+    opacity: 0.7;
+}
+.modal-content {
+    background-color: var(--panel-solid);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+    color: var(--text);
+    overflow: hidden;
+}
+.modal-content > .modal-header,
+.modal-content > .modal-body,
+.modal-content > .modal-footer,
+.modal-content > form > .modal-header,
+.modal-content > form > .modal-body,
+.modal-content > form > .modal-footer {
+    background-color: transparent;
+    color: var(--text);
+}
+.modal-header {
+    border-bottom: 1px solid var(--border);
+}
+.modal-footer {
+    border-top: 1px solid var(--border);
+}
+.modal-header .close {
+    color: var(--text);
+    opacity: 0.6;
+    text-shadow: none;
+}
+.modal-header .close:hover {
+    opacity: 1;
+}
+
+/* The Edit Filter dialog: each criterion is a Bootstrap .card in
+   Stash's #30404D, and its "is / is not / between…" choices were
+   slate chips with dark text, the chosen one Bootstrap blue. The rows
+   become plain lines on the dialog, the choices the theme's chips,
+   the chosen one white like every other selected control. */
+.criterion-list .card {
+    background-color: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+}
+.modifier-options .modifier-option.btn {
+    background-color: var(--control-bg) !important;
+    border-color: transparent !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+}
+.modifier-options .modifier-option.btn:hover {
+    background-color: var(--control-bg-hover) !important;
+    color: var(--text) !important;
+}
+.modifier-options .modifier-option.btn.selected {
+    background-color: rgba(255, 255, 255, 0.92) !important;
+    color: #0d1520 !important;
+}
+
+/* ── Date picker ──────────────────────────────────────────────────
+   Stash's is #202B33 with a #394B59 header and a blue chosen day. */
+div.react-datepicker {
+    background-color: var(--panel-solid);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    color: var(--text);
+    font-family: inherit;
+    overflow: hidden;
+}
+div.react-datepicker .react-datepicker__header,
+div.react-datepicker .react-datepicker-time__header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border);
+}
+div.react-datepicker .react-datepicker__current-month,
+div.react-datepicker .react-datepicker__day-name {
+    color: var(--text);
+}
+div.react-datepicker .react-datepicker__day-name {
+    color: var(--text-muted);
+}
+div.react-datepicker .react-datepicker__day {
+    border-radius: var(--radius-pill);
+    color: var(--text);
+}
+div.react-datepicker .react-datepicker__day:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: var(--radius-pill);
+}
+div.react-datepicker .react-datepicker__day--outside-month {
+    color: rgba(255, 255, 255, 0.35);
+}
+div.react-datepicker .react-datepicker__day--selected,
+div.react-datepicker .react-datepicker__day--keyboard-selected {
+    background-color: rgba(255, 255, 255, 0.92);
+    color: var(--bg-0);
+    font-weight: 700;
+}
+div.react-datepicker .react-datepicker__day--today {
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+div.react-datepicker .react-datepicker__triangle {
+    display: none;
+}
+div.react-datepicker .react-datepicker__year-dropdown,
+div.react-datepicker .react-datepicker__month-dropdown {
+    background-color: var(--surface-solid);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-sm);
+}
+
+/* ── Toasts ───────────────────────────────────────────────────────
+   Stash's are solid green, red or orange blocks. The colour still
+   says what happened — as a stripe down the left — on the theme's
+   panel, so a toast looks like part of the page. */
+.toast-container .toast.success,
+.toast-container .toast.danger,
+.toast-container .toast.warning {
+    background-color: var(--panel-solid);
+    border: 1px solid var(--surface-border);
+    border-left-width: 4px;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    color: var(--text);
+}
+.toast-container .toast.success { border-left-color: #2fbf71; }
+.toast-container .toast.danger  { border-left-color: #e5484d; }
+.toast-container .toast.warning { border-left-color: #f0a33a; }
+.toast-container {
+    opacity: 1;
+}
+
+/* ── Tooltips and popovers ────────────────────────────────────────
+   Bootstrap's tooltip is a black box; Stash's other popovers (rating,
+   filters, etc.) are #394B59. Both take the dropdown surface, which is
+   what the hover popovers already use (menus.css). */
+.tooltip .tooltip-inner {
+    background-color: var(--surface-solid);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    color: var(--text);
+}
+.tooltip.bs-tooltip-top .arrow::before    { border-top-color: var(--surface-solid); }
+.tooltip.bs-tooltip-bottom .arrow::before { border-bottom-color: var(--surface-solid); }
+.tooltip.bs-tooltip-left .arrow::before   { border-left-color: var(--surface-solid); }
+.tooltip.bs-tooltip-right .arrow::before  { border-right-color: var(--surface-solid); }
+
+.popover:not(.hover-popover-content) {
+    background-color: var(--surface-solid);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    color: var(--text);
+}
+.popover:not(.hover-popover-content) .popover-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+}
+.popover:not(.hover-popover-content) .popover-body {
+    color: var(--text);
+}
+.bs-popover-top:not(.hover-popover-content) > .arrow::after    { border-top-color: var(--surface-solid); }
+.bs-popover-bottom:not(.hover-popover-content) > .arrow::after { border-bottom-color: var(--surface-solid); }
+.bs-popover-left:not(.hover-popover-content) > .arrow::after   { border-left-color: var(--surface-solid); }
+.bs-popover-right:not(.hover-popover-content) > .arrow::after  { border-right-color: var(--surface-solid); }
+.popover:not(.hover-popover-content) > .arrow::before { border-color: transparent; }
+
+/* ── Tables (list view, and plugins that use one) ─────────────────
+   The list view's sticky header row is #202B33 — a black bar across
+   the top as you scroll. Same treatment as the navbar instead. */
+.table {
+    color: var(--text);
+}
+.table th,
+.table td,
+.table-bordered,
+.table-bordered th,
+.table-bordered td {
+    border-color: var(--border);
+}
+.table thead,
+.table thead th {
+    background-color: rgba(13, 21, 32, 0.88);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-bottom-color: var(--border);
+    color: var(--text-muted);
+}
+/* Stash also paints the header row itself (.table-list table thead,
+   which outranks the rule above) — clear it so only the cells' own
+   translucent fill shows. */
+.table-list table thead {
+    background-color: transparent;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: var(--text);
+}
+
+/* ── Badges ───────────────────────────────────────────────────────
+   badge-secondary is #394B59 (the play count on a scene's History
+   tab, among others). The theme's count pill instead. */
+.badge-secondary:not(:where(.tagger-container) *):not(.tag-item) {
+    background-color: rgba(255, 255, 255, 0.14);
+    color: var(--text);
+}
+
+/* ── The error box ("No scene found with id …") ───────────────────
+   A square red outline. Same panel as a dialog, with the red kept as a
+   stripe, like a failed toast. */
+.ErrorMessage-container .ErrorMessage {
+    background-color: var(--panel-solid);
+    border: 1px solid var(--surface-border);
+    border-left: 4px solid #e5484d;
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    padding: 1rem 1.25rem;
+}
+.ErrorMessage-container .ErrorMessage-content {
+    color: var(--text-muted);
+}
+
+/* ── Cards nobody else styled ─────────────────────────────────────
+   Any grid card the theme hasn't given its own look — another
+   plugin's — gets the same surface as
+   the rest. Every card type the theme does style has a more specific
+   rule that wins. */
+.grid-card.card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+    box-shadow: none;
+}
+
+/* ── Tagger surfaces (controls stay Stash's) ──────────────────────
+   Each scene, performer and studio in a tagger sits on a #495B68
+   block with a 3px corner; the Tags tagger's cards were already moved
+   to the card surface (tagger.css). This brings the rest in line. */
+.tagger-container .search-item {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--card-radius);
+}
+
+/* ── The scene player's scrubber ──────────────────────────────────
+   The thumbnail strip under the player: its arrows were Stash's link
+   blue on a #555 outline, and its marker track a flat #555. */
+.scrubber-wrapper .scrubber-button {
+    background: transparent;
+    border-color: var(--border);
+    color: rgba(255, 255, 255, 0.7);
+}
+.scrubber-wrapper .scrubber-button:hover,
+.scrubber-wrapper .scrubber-button:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--surface-border);
+    box-shadow: none;
+    color: #fff;
+}
+.scrubber-wrapper .scrubber-tags-background {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Image lightbox ───────────────────────────────────────────────
+   Stash dims the page with a neutral rgba(20, 20, 20, 0.8); the
+   theme's own deep blue instead, a little denser so the image stands
+   further forward. */
+.Lightbox {
+    background-color: rgba(6, 11, 19, 0.92);
+}
+
+/* ── Detail pages: the list under the header ──────────────────────
+   Stash gives .detail-body (the tabs and list on a tag, performer,
+   studio or group page) width:100% plus 15px side margins inside a
+   flex row, relying on the row to shrink it back. On phones the
+   list's contents set a minimum width the row couldn't shrink below,
+   so it ran 15px past the right edge: the search box, the pager and
+   the cards were cut off there. min-width:0 lets it shrink. With the
+   filter sidebar hidden, Stash also pads the list 15px on the left
+   to clear the sidebar's edge, but on phones the sidebar isn't drawn
+   at all, so that left the list 30px from the left and 15px from the
+   right; it now lines up with the list pages (15px each side). */
+.detail-body {
+    min-width: 0;
+}
+@media (max-width: 575.98px) {
+    .detail-body .sidebar-pane.hide-sidebar > .sidebar-pane-content {
+        padding-left: 0;
+    }
+}
+
+/* Tabs under the header (Scenes, Galleries, Images …): the same on all
+   four detail pages. Centred when they fit and scrollable from the
+   first tab when they don't: justify-content:center on a row wider
+   than its box pushes the first tabs off the left edge, where no
+   scrolling reaches them (on a phone the Scenes tab wasn't there).
+   Auto margins on the two end tabs centre the row the same way when
+   there's room, and drop to zero when there isn't. The selected tab
+   keeps Stash's blue. */
+.detail-body .nav-tabs {
+    justify-content: flex-start !important;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--surface-border) !important;
+}
+.detail-body .nav-tabs > :first-child {
+    margin-left: auto !important;
+}
+.detail-body .nav-tabs > :last-child {
+    margin-right: auto !important;
+}
+.detail-body .nav-tabs .nav-link {
+    padding: 0.6rem 0.9rem;
+    border: 0 !important;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+.detail-body .nav-tabs .nav-link:not(.active) {
+    background: transparent !important;
+    color: var(--text-muted) !important;
+}
+.detail-body .nav-tabs .nav-link:not(.active):hover {
+    color: var(--text) !important;
+}
+/* The open tab: the navbar's current-page pill. Left alone it kept
+   Bootstrap's link-blue text on Stash's slate body colour. */
+.detail-body .nav-tabs .nav-link.active {
+    background: var(--pill-active) !important;
+    color: var(--text) !important;
+    border-radius: var(--radius-pill) !important;
+}
+.detail-body .nav-tabs .badge {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: var(--text) !important;
+    font-weight: 600;
+}
+@media (max-width: 767.98px) {
+    .detail-body .nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .detail-body .nav-tabs .nav-link {
+        flex-shrink: 0;
+    }
+}
+
+/* Detail page headers stack on phones (photo, then details). The
+   details column was laid out at the width of its own content, so a
+   performer with short facts got a narrower table than one with a
+   long bio, and it sat to the left. It now always spans the column. */
+@media (max-width: 767.98px) {
+    .detail-header .detail-container > .row {
+        align-self: stretch;
+        width: auto;
+        min-width: 0;
+    }
+}

@@ -1,0 +1,93 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — gallery cards (mirrors the scene cards)
+
+   cover (4:3, zoomed to fill), counts bottom right
+   studio logo · "Sep 2020"
+   title, two lines tall
+   performers
+   description, 2 lines
+   tag pills
+
+   The layout itself is shared with scene cards (cards.css); this
+   file has only what is gallery-specific.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Card: same as scene cards ────────────────────────────────────── */
+.gallery-card.card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--card-radius) !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    transition: background-color var(--ease), border-color var(--ease);
+}
+.gallery-card.card:hover {
+    background: var(--card-bg-hover) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* ── Cover: landscape 4:3, zoomed in to fill ──────────────────────────
+   Covers are often portrait photos; rather than letterboxing them with
+   bars, they're scaled up to fill the frame, anchored a little above
+   centre so faces tend to stay in shot. The hover scrubber still works. */
+.gallery-card .thumbnail-section,
+.gallery-card .gallery-card-header {
+    display: block;
+    height: auto !important;
+}
+.gallery-card .gallery-card-cover {
+    position: relative;
+    width: 100%;
+    height: auto !important;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.25);
+}
+.gallery-card .gallery-card-image {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center 25%;
+}
+
+/* Hover scrubber (flicking through the images): styled like the
+   watch-progress bar on scene cards. Stash draws it as a faint track
+   with a small coloured marker inside; the track gets the progress
+   track's grey, the marker the progress bar's grey. */
+.gallery-card .hover-scrubber-indicator {
+    background-color: var(--progress-track) !important;
+}
+.gallery-card .hover-scrubber-indicator > *,
+.gallery-card .hover-scrubber-indicator-marker {
+    background-color: var(--progress-fill) !important;
+}
+
+/* Stash's studio logo over the thumbnail is hidden by the shared rule
+   in cards.css, since ours now sits above the title. */
+
+/* ── Body ────────────────────────────────────────────────────────────
+   The column, its gap, the studio · date row, the two-line title, the
+   performers and the tag footer are shared with scene cards
+   (cards.css). */
+/* Stash's own raw date is replaced by the friendlier one */
+.gallery-card .card-section:has(.sticky-date) .gallery-card__date {
+    display: none !important;
+}
+/* Stash's details block, once its date is hidden, holds only the
+   description; with no description it would be an empty row. */
+.gallery-card .gallery-card__details:not(:has(.gallery-card__description)) {
+    display: none !important;
+}
+/* Description: 2 lines (Stash sets 3 inline, hence !important) */
+.gallery-card .gallery-card__description {
+    -webkit-line-clamp: 2 !important;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.74);
+}

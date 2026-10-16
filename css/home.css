@@ -1,0 +1,257 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — the home page rows
+
+   The home page is Stash's "recommendations": one carousel per saved
+   filter. The theme had never touched it, so it still showed
+   Bootstrap and slick-carousel defaults — a 17.5px uppercase heading
+   sitting 15px further in than every list page's first card, a blue
+   "View All", the slick icon font's arrows, and a row of dots drawn
+   with a bullet character. The carousel itself is now a natively
+   scrolling strip (home-rows.js).
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Where the rows start ─────────────────────────────────────────
+   A list page's first card sits 20px from the window edge. Stash
+   gives this container 20px of padding on top of the page's own
+   15px, so the rows began at 35px and everything shifted sideways
+   when you moved between Home and Scenes. 5px here lines the two up. */
+.recommendations-container {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+/* ── Row heading ──────────────────────────────────────────────────
+   Sentence case at the size the theme uses for a section heading,
+   rather than small uppercase — the heading is the name the user
+   gave the saved filter, so it reads better as they typed it. */
+.recommendation-row-head {
+    padding: 1.5rem 0 0.9rem;
+}
+.recommendation-row-head h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-transform: none;
+}
+
+/* "View All" was Stash's link blue, the only blue text on the page. */
+.recommendation-row-head a {
+    align-self: center;
+    border-radius: var(--radius-pill);
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 0.35rem 0.8rem;
+    text-transform: uppercase;
+    transition: background-color var(--ease), color var(--ease);
+}
+.recommendation-row-head a:hover,
+.recommendation-row-head a:focus {
+    background-color: var(--pill-hover);
+    color: var(--text);
+    text-decoration: none;
+}
+
+/* ── The row: a strip the browser scrolls (home-rows.js) ──────────
+   Cards keep the widths they had in the carousel; the strip lines
+   them up, all as tall as the tallest. No snapping: even the gentle
+   kind cut a flick's momentum short and pulled the row back onto a
+   card edge as it slowed, so the row runs free and stops where the
+   swipe takes it. (The arrows still land on card edges; they work
+   that out themselves.) */
+.sticky-row {
+    position: relative;
+}
+.sticky-row__strip {
+    position: relative;              /* cards' offsetLeft is from here */
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+}
+.sticky-row__strip::-webkit-scrollbar {
+    display: none;
+}
+.sticky-row__strip > * {
+    flex: 0 0 auto;
+}
+/* With a trackpad, a sideways swipe that runs past the start of a row
+   would carry on into the browser's "back" gesture. Touch screens are
+   left alone so the row keeps its full bounce at each end. */
+@media (hover: hover) and (pointer: fine) {
+    .sticky-row__strip {
+        overscroll-behavior-x: contain;
+    }
+}
+/* Stash gives carousel cards 98% of a slide's height; in a flex row
+   stretch does it exactly. */
+.sticky-row__strip > .card {
+    height: auto;
+}
+
+/* ── Arrows (desktop) ─────────────────────────────────────────────
+   The chevron the page switcher and the phone header use, over the
+   first and last card on a short fade, shown while the pointer is
+   over the row and hidden at the end it would scroll past. They are
+   not needed on a touch screen, where the row is swiped. */
+.sticky-row__arrow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 2;
+    width: 2.8rem;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+}
+.sticky-row__arrow[hidden] {
+    display: none;
+}
+.sticky-row__arrow--prev {
+    left: 0;
+    background: linear-gradient(to right, rgba(5, 10, 18, 0.75), rgba(5, 10, 18, 0));
+}
+.sticky-row__arrow--next {
+    right: 0;
+    background: linear-gradient(to left, rgba(5, 10, 18, 0.75), rgba(5, 10, 18, 0));
+}
+.sticky-row__arrow::before {
+    content: "";
+    display: block;
+    width: 1.6rem;
+    height: 1.6rem;
+    margin: 0 auto;
+    background-color: #fff;
+    opacity: 0.55;
+    transition: opacity var(--ease);
+}
+.sticky-row__arrow--prev::before {
+    -webkit-mask: var(--sticky-chev-left) no-repeat center / 1.2rem;
+    mask: var(--sticky-chev-left) no-repeat center / 1.2rem;
+}
+.sticky-row__arrow--next::before {
+    -webkit-mask: var(--sticky-chev-right) no-repeat center / 1.2rem;
+    mask: var(--sticky-chev-right) no-repeat center / 1.2rem;
+}
+.sticky-row__arrow:hover::before,
+.sticky-row__arrow:focus-visible::before {
+    opacity: 1;
+}
+/* With a mouse they stay out of the way until the pointer is over
+   the row, and take no clicks while hidden, so the edges of the end
+   cards stay clickable. */
+@media (hover: hover) {
+    .sticky-row__arrow {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--ease);
+    }
+    .sticky-row:hover .sticky-row__arrow,
+    .sticky-row__arrow:focus-visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+@media (max-width: 767.98px), (hover: none) {
+    .sticky-row__arrow {
+        display: none;
+    }
+}
+
+/* ── Phones: the strip runs to the screen's edges ─────────────────
+   Cards scroll out under the edge of the screen rather than being
+   cut off 20px short of it; the padding keeps the first card where
+   it was when the row is at its start. */
+@media (max-width: 767.98px) {
+    .sticky-row__strip {
+        margin-inline: -20px;
+        padding-inline: 20px;
+    }
+}
+
+/* ── "Customise" ──────────────────────────────────────────────────
+   Bootstrap primary blue, alone at the foot of the page. */
+.recommendations-footer .btn-primary {
+    background-color: var(--control-bg);
+    border-color: transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-weight: 600;
+}
+.recommendations-footer .btn-primary:hover,
+.recommendations-footer .btn-primary:focus,
+.recommendations-footer .btn-primary:not(:disabled):not(.disabled):active {
+    background-color: var(--control-bg-hover);
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--text);
+}
+
+/* ── Nothing to show ──────────────────────────────────────────────
+   The message Stash shows on a brand-new library. */
+.no-recommendations {
+    color: var(--text-muted);
+    font-size: 1.15rem;
+    padding: 4rem 1rem;
+}
+
+/* ── Phone ────────────────────────────────────────────────────────
+   Stash drops the container padding here; the arrows would then sit
+   off-screen, so they go over the row's edges instead. */
+@media (max-width: 767.98px) {
+    .recommendation-row-head {
+        padding: 1.1rem 0 0.7rem;
+    }
+    .recommendation-row-head h2 {
+        font-size: 1.15rem;
+    }
+}
+
+/* ── Phone carousels: two small tiles across, and a sliver ───────
+   Scenes, galleries and groups keep their big tiles (a group card is
+   laid out like a scene card, and squeezed to half width its studio,
+   date and title were cut off). Performers, studios and markers shrink to two across the screen (about the
+   height of a scene tile), so more of the home page fits on one
+   screen. Studios drop their counts here. */
+@media (max-width: 575.98px) {
+    .recommendation-row :is(.performer-card, .studio-card, .scene-marker-card).card {
+        /* two tiles and a sliver of the third, the usual hint that
+           the row scrolls */
+        width: calc((100vw - 80px) / 2) !important;
+        max-width: calc((100vw - 80px) / 2) !important;
+        min-width: 0 !important;
+    }
+    /* Studios: the logo tile alone */
+    .recommendation-row .studio-card :is(.card-popovers, .card-section) {
+        display: none !important;
+    }
+    .recommendation-row :is(.performer-card, .studio-card, .scene-marker-card) .card-section-title {
+        font-size: 1.05rem !important;
+    }
+    /* Performers: a 4:5 photo instead of 2:3, and the name and the
+       facts line on one line each (fading out), so the tile ends up
+       about as tall as a scene tile */
+    .recommendation-row .performer-card .performer-card-image {
+        aspect-ratio: 4 / 5 !important;
+        height: auto !important;
+        object-fit: cover;
+    }
+    .recommendation-row :is(.performer-card, .scene-marker-card) .card-section-title,
+    .recommendation-row .performer-card .sticky-performer-facts {
+        flex-wrap: nowrap !important;
+        white-space: nowrap;
+        overflow: hidden;
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.75rem), transparent);
+        mask-image: linear-gradient(to right, #000 calc(100% - 1.75rem), transparent);
+    }
+    .recommendation-row :is(.performer-card, .scene-marker-card) .card-section-title * {
+        display: inline !important;
+        white-space: nowrap !important;
+        -webkit-line-clamp: unset !important;
+    }
+    .recommendation-row .performer-card .sticky-performer-facts > * {
+        flex-shrink: 0;
+    }
+}

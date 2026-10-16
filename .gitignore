@@ -1,0 +1,4 @@
+.DS_Store
+*.zip
+_site/
+.fuse_hidden*

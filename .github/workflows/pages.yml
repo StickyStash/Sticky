@@ -1,0 +1,42 @@
+# Publishes the Stash plugin source (index.yml + sticky.zip) to GitHub
+# Pages on every push to main. Turn it on once in the repo:
+# Settings → Pages → Build and deployment → Source: GitHub Actions.
+# The plugin source address is then
+#   https://<your-user>.github.io/<repo>/index.yml
+name: Publish plugin source
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build index.yml and sticky.zip
+        run: sh build.sh
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

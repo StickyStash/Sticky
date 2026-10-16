@@ -1,0 +1,113 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — page header for phones   (mobile-header.js)
+
+       Scenes ⌄   Grid
+       [ search                              ]
+       [ Date ⌄ ] [filter] [saved]        [ … ]
+
+   Phones only. On anything wider the page keeps Stash's own layout
+   and the view buttons stay in the toolbar.
+   ─────────────────────────────────────────────────────────────────── */
+
+.sticky-mh {
+    display: none;
+}
+
+@media (max-width: 767.98px) {
+    .sticky-mh {
+        position: relative;
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        margin: 0 0 0.9rem;
+    }
+
+    /* The page name, with the chevron that opens the views */
+    .sticky-mh__title {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--text);
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+        cursor: pointer;
+    }
+    .sticky-mh__title::after {
+        content: "";
+        width: 0.9rem;
+        height: 0.9rem;
+        background-color: currentColor;
+        opacity: 0.55;
+        transition: transform var(--ease);
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E") center / contain no-repeat;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 9l7 7 7-7'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+    .sticky-mh__title.is-open::after {
+        transform: rotate(180deg);
+    }
+
+    /* Which view you're in, quietly, beside the title */
+    .sticky-mh__view {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    /* The menu (colours come from menus.css) */
+    .sticky-mh__menu {
+        position: absolute;
+        top: calc(100% + 0.35rem);
+        left: 0;
+        z-index: 1040;
+        display: block;
+        min-width: 11rem;
+    }
+    .sticky-mh__menu .dropdown-item {
+        width: 100%;
+        border: 0;
+        text-align: left;
+    }
+    .sticky-mh__empty {
+        padding: 0.45rem 0.8rem;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+    }
+
+    /* ── The toolbar gives up its view buttons ─────────────────────
+       Named by the icon inside them rather than by position, so the
+       "…" menu on a page with no views (Groups) is left alone. */
+    .filtered-list-toolbar .btn:has(svg[data-icon="table-cells-large"]),
+    .filtered-list-toolbar .btn:has(svg[data-icon="list"]),
+    .filtered-list-toolbar .btn:has(svg[data-icon="square"]),
+    .filtered-list-toolbar .btn:has(svg[data-icon="tags"]),
+    .filtered-list-toolbar > .sticky-tc-slot {
+        display: none !important;
+    }
+    /* With the view group gone there is nothing to separate */
+    div:has(> .filtered-list-toolbar)::before {
+        display: none;
+    }
+}
+
+/* A page with no other views (Groups) is a plain title */
+@media (max-width: 767.98px) {
+    .sticky-mh__title.is-plain {
+        cursor: default;
+    }
+    .sticky-mh__title.is-plain::after {
+        display: none;
+    }
+}
+
+/* Home: "Welcome back! ⌄ Sticky" — the chevron is there for the look only */
+@media (max-width: 767.98px) {
+    .sticky-mh--home .sticky-mh__title {
+        cursor: default;
+    }
+}

@@ -1,0 +1,398 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — the scene, gallery and image detail panels
+
+   All three pages are built the same way by Stash — a header with
+   the studio logo, title and date, a toolbar of stars and counters,
+   then tabs over a details panel — and they use the same element
+   names with "scene", "gallery" or "image" in front. So every rule
+   here covers all three, and the gallery and image pages inherit the
+   scene page's look for free rather than having a copy of it that
+   drifts.
+
+   A Scene Title, However Long It Runs         ← bigger title, on top
+   [studio logo]  19 December 2025  24 fps · 720p
+   ★★★★★ │ ◉4  ◍0  ⬚  ⋮
+   Details  Queue  Markers  …                  ← tabs as on performers
+   ─────────────────────────────────────────────
+   Created · Updated · Studio code · Director   ← Stash's own order
+   description
+   (Tag) (Tag) (Tag)
+   Performers
+   [cards]
+
+   CSS only, and nothing is added, moved or reordered: every rule
+   here restyles what Stash already draws, where Stash draws it.
+   (Adding elements inside the panel crashed the page twice, and
+   reordering the panel pushed the other tabs' content down.)
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Title, studio, date ──────────────────────────────────────────
+   Stash's own blocks, in Stash's own order: title, then the studio
+   logo, then the date line. Nothing is flattened or moved. */
+/* Stash's own order: logo, then title, then the date line. Turning
+   it around meant fighting the space a heading keeps for text, so
+   it's left as Stash has it. */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-header-container, .gallery-header-container, .image-header-container) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-header, .gallery-header, .image-header) {
+    margin: 0;
+    font-size: 1.85rem;
+    font-weight: 700;
+    /* A tighter line box, so the space under the title matches the
+       space under the logo instead of looking bigger. */
+    line-height: 1.15;
+    text-align: left;
+    color: var(--text);
+}
+/* The logo is an image on a text line, and a text line always keeps
+   room for letters that hang below the baseline — that invisible
+   strip was the extra gap, and the link's clickable area with it.
+   Making the heading and its link boxes of their own removes it. */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) h1.studio-logo {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    margin: 0 !important;
+    font-size: 1rem;              /* studios with no logo show a name */
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: left;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) h1.studio-logo > a {
+    display: flex;
+    align-items: center;
+    line-height: 0;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) h1.studio-logo img {
+    display: block;
+    max-width: 110px;
+    max-height: 26px;
+    object-fit: contain;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-subheader, .gallery-subheader, .image-subheader) {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-subheader, .gallery-subheader, .image-subheader) .date {
+    font-weight: 700;
+    color: var(--text);
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-subheader, .gallery-subheader, .image-subheader) .divider {
+    opacity: 0.5;
+}
+
+/* ── Toolbar: stars │ views · O · organised · ⋮ ───────────────────── */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar, .gallery-toolbar, .image-toolbar) {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-start !important;
+    gap: 0.3rem;
+    margin: 0.5rem 0 0.6rem;
+    padding: 0;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar, .gallery-toolbar, .image-toolbar),
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar, .gallery-toolbar, .image-toolbar) .rating-stars,
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar-group, .gallery-toolbar-group, .image-toolbar-group) {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar-group, .gallery-toolbar-group, .image-toolbar-group) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
+    margin: 0 !important;      /* Stash pushes the second group right */
+    padding: 0 !important;
+    /* Stash gives these groups a full-width basis, which put the
+       counters on a line of their own; hold them to their content. */
+    flex: 0 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    justify-content: flex-start !important;
+}
+/* The counters keep to the right, as Stash has them */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar, .gallery-toolbar, .image-toolbar) > :is(.scene-toolbar-group, .gallery-toolbar-group, .image-toolbar-group) + :is(.scene-toolbar-group, .gallery-toolbar-group, .image-toolbar-group) {
+    margin-left: auto !important;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar, .gallery-toolbar, .image-toolbar) :not(.rating-stars) > .btn {
+    padding: 0.25rem 0.4rem !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--text-muted) !important;
+}
+/* Stars: Stash lays the filled star over the empty one, so ANY
+   change to those buttons shifts the two apart and a set star sits
+   slightly high. They're left completely alone now — only the row
+   itself is nudged left, to line up with the title and date. */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar, .gallery-toolbar, .image-toolbar) .rating-stars {
+    margin-left: -0.35rem !important;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar, .gallery-toolbar, .image-toolbar) :not(.rating-stars) > .btn:hover {
+    color: var(--text) !important;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar, .gallery-toolbar, .image-toolbar) .filled-star {
+    color: #f5c451;
+}
+/* A divider between the stars and the counters */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-toolbar, .gallery-toolbar, .image-toolbar) > :is(.scene-toolbar-group, .gallery-toolbar-group, .image-toolbar-group) + :is(.scene-toolbar-group, .gallery-toolbar-group, .image-toolbar-group)::before {
+    content: "";
+    width: 1px;
+    height: 1.1rem;
+    margin: 0 0.5rem 0 0.3rem;
+    background: rgba(255, 255, 255, 0.18);
+}
+
+/* ── Tabs: the same as the performer page ─────────────────────────── */
+/* (.gallery-container covers the Images / Add strip above a gallery's
+   images, which had kept Bootstrap's blue text and underline.) */
+:is(.scene-tabs, .gallery-tabs, .image-tabs, .gallery-container) .nav-tabs {
+    justify-content: flex-start !important;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--surface-border) !important;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs, .gallery-container) .nav-tabs .nav-link {
+    padding: 0.6rem 0.9rem;
+    border: 0 !important;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs, .gallery-container) .nav-tabs .nav-link:not(.active) {
+    background: transparent !important;
+    color: var(--text-muted) !important;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs, .gallery-container) .nav-tabs .nav-link:not(.active):hover {
+    color: var(--text) !important;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs, .gallery-container) .nav-tabs .nav-link.active {
+    background: var(--pill-active) !important;
+    color: var(--text) !important;
+    border-radius: var(--radius-pill) !important;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs, .gallery-container) .nav-tabs .badge {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: var(--text) !important;
+    font-weight: 600;
+}
+
+/* ── Details panel ────────────────────────────────────────────────── */
+/* Room between Created / Updated and the description */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane :is(.scene-details, .gallery-details, .image-details) {
+    padding-bottom: 0.9rem;
+}
+
+/* Stash's "Details:" and "Tags" labels say nothing the layout doesn't */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane h6:has(+ p.pre),
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane h6:has(+ .tag-item) {
+    display: none !important;
+}
+
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane h6 {
+    margin: 1.25rem 0 0.6rem;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-muted);
+}
+
+/* Description */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane p.pre {
+    margin: 0 0 0.9rem;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.8);
+    white-space: pre-wrap;
+}
+
+/* Tags: one line, then "more" */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane .tag-item {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 6px 6px 0;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 1px solid var(--chip-border);
+    border-radius: var(--radius-pill);
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane .tag-item a,
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane .tag-item a:hover {
+    display: block;
+    padding: 4px 11px;
+    color: var(--text-muted) !important;
+    text-decoration: none !important;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane .tag-item:hover {
+    border-color: rgba(255, 255, 255, 0.32);
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane .tag-item:hover a {
+    color: var(--text) !important;
+}
+/* Performers: left aligned, like every other list. Nothing else is
+   touched here — setting a gap and clearing the row's own margins
+   made the cards too wide to sit two abreast. */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-performers, .gallery-performers, .image-performers) {
+    justify-content: flex-start !important;
+}
+
+/* Stash prints how old they were when this was filmed; next to a
+   scene that beats the career years, so they swap places. */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .performer-card .sticky-pill--career {
+    display: none !important;
+}
+/* The card's body is ordered so the age at the time sits directly
+   under the name, above the gender / country line. */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .performer-card .card-section {
+    display: flex;
+    flex-direction: column;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .performer-card .card-section > a:has(.card-section-title) {
+    order: 0;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .performer-card:has(.sticky-card-footer) .performer-card__age {
+    order: 1;
+    display: block !important;
+    margin: 0 0 0.3rem;
+    padding: 0;
+    border: 0;
+    color: rgba(255, 255, 255, 0.74);
+    font-size: 1.05rem;           /* same as the facts line below it */
+    font-weight: 400;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .performer-card .sticky-performer-facts {
+    font-size: 1.05rem;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .performer-card .sticky-performer-facts {
+    order: 2;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .performer-card .performer-card__age ~ * {
+    order: 3;
+}
+/* Their age today isn't the useful one here — only that span has no
+   class of its own, so it's the one that goes. The dot stays, and
+   now separates the gender icon from the country. */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .performer-card .sticky-performer-facts > span:not([class]) {
+    display: none !important;
+}
+
+
+/* ── The last block: created, updated, studio code, file ──────────── */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-details, .gallery-details, .image-details) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.5rem;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-details, .gallery-details, .image-details) h6 {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin: 0 !important;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+/* ── Phones ───────────────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+    :is(.scene-tabs, .gallery-tabs, .image-tabs) :is(.scene-header, .gallery-header, .image-header) {
+        font-size: 1.5rem;
+    }
+    :is(.scene-tabs, .gallery-tabs, .image-tabs, .gallery-container) .nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        /* Sideways only. With overflow-x set and overflow-y left
+           alone, the browser makes the strip scrollable vertically
+           too — so a thumb swipe would drag the tabs up a few pixels
+           and let them spring back. */
+        overflow-y: hidden;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
+    }
+    :is(.scene-tabs, .gallery-tabs, .image-tabs, .gallery-container) .nav-tabs .nav-item {
+        flex-shrink: 0;
+    }
+}
+
+/* ── Two performers to a row, always ──────────────────────────────
+   Stash gives each performer card a fixed 210px. Both of these
+   panels are narrow — the gallery's is about 450px — so two cards
+   plus their 5px margins miss fitting by a couple of pixels and you
+   get one enormous card per row. Half the row each holds two at any
+   width, on a phone and on a desktop alike. */
+:is(.scene-tabs, .gallery-tabs, .image-tabs)
+    :is(.scene-performers, .gallery-performers, .image-performers) .performer-card {
+    width: calc(50% - 10px) !important;
+    max-width: calc(50% - 10px) !important;
+    min-width: 0 !important;
+}
+
+/* ── Sticky bars inside the tabs ──────────────────────────────────
+   Two strips pin themselves to the top of a tab as it scrolls — the
+   queue's Continue/skip controls (#queue-viewer .queue-controls) and
+   the Save/Delete row on the Edit tab (.edit-buttons-container) —
+   and both paint Stash's near-black #202B33 behind themselves so the
+   content sliding underneath doesn't show through. Against the
+   theme's blue that reads as a black band across the panel.
+
+   Same treatment as the navbar: the page colour at three-quarter
+   strength over a blur, so the bar still hides what passes under it
+   but belongs to the page it's sitting on. */
+#queue-viewer .queue-controls,
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .edit-buttons-container {
+    background-color: rgba(13, 21, 32, 0.78) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Details tab: Created, Updated, Studio Code, Director ──────────
+   Stash puts the dates in a 9/12 column with Studio Code and Director
+   in 3/12 columns beside them, so on a narrow panel "Studio Code" sat
+   on the same line as "Updated At". Each now gets its own line. */
+.row:has(> .scene-details) > [class*="col"] {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+}
+.row:has(> .scene-details) > .scene-details {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+}
+.row:has(> .scene-details) h6 {
+    margin-bottom: 0.25rem;
+}
+
+/* The thin button between the details panel and the player (or a
+   gallery's images) that folds the panel away: its chevron was
+   Bootstrap's link blue. */
+:is(.scene-divider, .gallery-divider) .btn {
+    color: var(--text-muted) !important;
+}
+:is(.scene-divider, .gallery-divider) .btn:hover {
+    color: var(--text) !important;
+}
+
+/* Plain text links in the panels — the file path and fingerprint
+   links on File Info, an image's gallery under its title — were
+   Bootstrap's link blue. They get the underlined light text the
+   theme's other text links use ("From …" on marker cards). */
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane :is(.details-list dd a, h6 > a):not(.btn) {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.3);
+    text-underline-offset: 3px;
+}
+:is(.scene-tabs, .gallery-tabs, .image-tabs) .tab-pane :is(.details-list dd a, h6 > a):not(.btn):hover {
+    color: var(--text);
+    text-decoration-color: rgba(255, 255, 255, 0.7);
+}

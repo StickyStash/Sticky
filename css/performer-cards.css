@@ -1,0 +1,289 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — performer cards (mirrors the scene cards)
+
+   photo
+   name
+   facts: ♂ 33 yrs · 🇧🇷 Brazil        ← performer-cards.js
+   [2014–]               ▶ 12  💧 3    ← career pill (+ any add-on
+                                          pills) + Stash's counts
+
+   Old pieces (age line, flag on the photo, gender icon by the name)
+   are hidden only once the script's replacements are on the card.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Card: same as scene cards ────────────────────────────────────── */
+.performer-card.card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--card-radius) !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    transition: background-color var(--ease), border-color var(--ease);
+}
+.performer-card.card:hover {
+    background: var(--card-bg-hover) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Flag leaves the photo (it's in the facts line now) */
+.performer-card:has(.sticky-card-footer) .thumbnail-section > a[href*="country"] {
+    display: none !important;
+}
+
+/* ── Body ─────────────────────────────────────────────────────────── */
+/* One even gap between every row: photo → name → facts → pills →
+   counts, in line with the scene cards' spacing */
+.performer-card {
+    --performer-gap: 14px;
+}
+.performer-card .card-section {
+    padding: var(--performer-gap) var(--card-pad) 0 !important;
+}
+.performer-card .card-section-title,
+.performer-card .card-section-title .performer-name {
+    font-size: 1.25rem !important;   /* Stash sets its own, smaller size */
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+}
+.performer-card .card-section-title {
+    margin: 0 0 var(--performer-gap) !important;
+}
+/* No facts line: don't leave its gap behind */
+.performer-card .card-section:not(:has(.sticky-performer-facts)) .card-section-title {
+    margin-bottom: 0 !important;
+}
+/* Footer: the pills row follows straight after the facts, and only the
+   counts row is pinned to the bottom of the card. When cards in a row
+   (or a home carousel) are stretched to the same height, the spare
+   space opens up above the counts instead of above the pills, so the
+   top of every card reads the same. The footer wrapper is flattened
+   so its two rows can be placed separately in the card. */
+.performer-card .sticky-card-footer {
+    display: contents;
+}
+.sticky-performer-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: var(--performer-gap) var(--card-pad) 0;
+}
+.sticky-performer-pills:empty {
+    display: none;
+}
+.performer-card .sticky-card-footer > .sticky-card-extras {
+    margin-top: auto;
+    padding: var(--performer-gap) var(--card-pad) 18px;
+}
+.performer-card .card-section > a,
+.performer-card .card-section > a:hover {
+    color: var(--text);
+    text-decoration: none;
+}
+/* Gender moves to the facts line. The icon's wrapper goes too; left
+   behind, its spacing pushed the name right of the facts line. */
+.performer-card:has(.sticky-card-footer) .card-section-title > span:has(> .gender-icon),
+.performer-card:has(.sticky-card-footer) .card-section-title .gender-icon {
+    display: none !important;
+}
+.performer-card .performer-disambiguation {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* Facts line: same size and grey as the scene card date */
+.sticky-performer-facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.74);   /* same as the scene synopsis */
+}
+/* A little extra room either side of the dot */
+.sticky-dot {
+    margin: 0 0.15rem;
+}
+.sticky-country {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: inherit !important;
+    text-decoration: none !important;
+    transition: color var(--ease);
+}
+.sticky-country:hover {
+    color: var(--text) !important;
+}
+.sticky-country .fi {
+    position: static !important;        /* Stash pins flags to the photo */
+    inset: auto !important;
+    margin: 0 !important;
+    width: 1.2em !important;
+    height: 0.9em !important;
+    line-height: 1 !important;
+    background-size: cover;
+    border-radius: 2px;
+    box-shadow: none !important;
+    flex-shrink: 0;
+}
+/* Stash's own "27 years old" line is replaced by the facts line */
+.performer-card:has(.sticky-card-footer) .performer-card__age {
+    display: none !important;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────── */
+/* (.sticky-card-footer / .sticky-card-extras are shared with scene cards) */
+.performer-card:has(.sticky-card-footer) > hr {
+    display: none !important;
+}
+
+
+/* Counts follow straight after the pill (left aligned), in white.
+   Stash's button group is flattened so the gallery count can sit
+   right after the scene count. */
+.performer-card .sticky-card-extras {
+    margin-left: 0;
+    gap: 0.5rem;
+}
+.performer-card .sticky-card-extras .card-popovers {
+    display: contents;
+}
+.performer-card .sticky-card-extras .card-popovers > * { order: 3; }
+.performer-card .sticky-card-extras .card-popovers > .scene-count { order: 1; }
+.performer-card .sticky-card-extras .sticky-gallery-count { order: 2; }
+.performer-card:has(.sticky-gallery-count) .card-popovers > .gallery-count {
+    display: none;   /* ours replaces Stash's (which hides at zero) */
+}
+.performer-card .sticky-card-extras .btn,
+.performer-card .sticky-card-extras .sticky-gallery-count {
+    color: var(--text) !important;
+    text-decoration: none !important;
+}
+.performer-card .sticky-card-extras .btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.35rem;
+}
+.performer-card .sticky-card-extras .btn svg {
+    margin: 0 !important;
+}
+.sticky-pill--career {
+    border: 1px solid var(--chip-border);   /* outlined, like tag pills */
+    color: var(--text-muted);
+}
+.sticky-pill--career::before {
+    --sticky-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 7v5l3.5 2'/%3E%3C/svg%3E");
+}
+.sticky-pill--career::before {
+    content: "";
+    flex-shrink: 0;
+    width: 0.88rem;
+    height: 0.88rem;
+    background-color: currentColor;
+    -webkit-mask: var(--sticky-icon) center / contain no-repeat;
+    mask: var(--sticky-icon) center / contain no-repeat;
+}
+
+
+/* ── Gender icons (performer-cards.js adds the class) ─────────────────
+   Bold stroked symbols drawn with masks, so they stay readable small.
+   One per gender Stash offers; colours are soft versions of the usual
+   ones so they sit quietly next to the grey text. */
+.sticky-gender {
+    display: inline-block;
+    flex-shrink: 0;
+    width: 1.1rem;
+    height: 1.1rem;
+    background-color: currentColor;
+    -webkit-mask: var(--sticky-icon) center / contain no-repeat;
+    mask: var(--sticky-icon) center / contain no-repeat;
+}
+.sticky-gender--male { color: #85b7eb; --sticky-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9.5' cy='14.5' r='5.5'/%3E%3Cpath d='M13.5 10.5 20 4M14.5 4H20v5.5'/%3E%3C/svg%3E"); }
+.sticky-gender--female { color: #f2a7c7; --sticky-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8.5' r='5.5'/%3E%3Cpath d='M12 14v8M8.5 18.5h7'/%3E%3C/svg%3E"); }
+.sticky-gender--trans-male { color: #7fcdee; --sticky-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9.5' cy='14.5' r='5.5'/%3E%3Cpath d='M13.5 10.5 20 4M14.5 4H20v5.5M13.4 7.8l2.8 2.8'/%3E%3C/svg%3E"); }
+.sticky-gender--trans-female { color: #f5a9b8; --sticky-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8.5' r='5.5'/%3E%3Cpath d='M12 14v8M8.5 17.2h7M8.5 20.6h7'/%3E%3C/svg%3E"); }
+.sticky-gender--intersex { color: #e8cf6b; --sticky-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9.5' cy='11' r='5'/%3E%3Cpath d='M13 7.5l6-5.5M14.5 2H19v4.5M9.5 16v6M6.5 19h6'/%3E%3C/svg%3E"); }
+.sticky-gender--non-binary { color: #c8b6ef; --sticky-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='15' r='5.5'/%3E%3Cpath d='M12 9.5V2M8.5 3.3l7 4M15.5 3.3l-7 4'/%3E%3C/svg%3E"); }
+
+/* ── Favourites: white heart, faint pink tile ─────────────────────── */
+.performer-card .favorite-button {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.performer-card .favorite-button svg {
+    width: 1.3rem !important;
+    height: 1.3rem !important;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+}
+.performer-card .favorite-button.favorite {
+    color: #fff !important;
+}
+.performer-card.card:has(.favorite-button.favorite) {
+    background: rgba(242, 167, 199, 0.13) !important;
+    border-color: rgba(242, 167, 199, 0.38) !important;
+}
+.performer-card.card:has(.favorite-button.favorite):hover {
+    background: rgba(242, 167, 199, 0.17) !important;
+    border-color: rgba(242, 167, 199, 0.5) !important;
+}
+
+/* ── Rating: ★ 4.5 after the name instead of the corner banner ────── */
+.performer-card .rating-banner {
+    display: none !important;
+}
+.sticky-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: 0.6rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.74);   /* same grey as age / country */
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.sticky-rating::before {
+    content: "";
+    width: 0.9rem;
+    height: 0.9rem;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7L12 17.4l-6.3 3.8 1.7-7L2 9.5l7.1-.6z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7L12 17.4l-6.3 3.8 1.7-7L2 9.5l7.1-.6z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* ── Phones: short country names ("USA", "U.K.") ──────────────────── */
+.sticky-country-short {
+    display: none;
+}
+@media (max-width: 575.98px) {
+    .sticky-country-full {
+        display: none;
+    }
+    .sticky-country-short {
+        display: inline;
+    }
+}
+
+/* ── Two to a row on a phone ──────────────────────────────────────
+   Stash hands the grid no card width on a phone (useCardWidth bails
+   out of its measuring on mobile), so each card took the full row
+   and a portrait filled most of the screen. Half-width shows two
+   faces at once, which is how you actually scan a performer list. */
+@media (max-width: 767.98px) {
+    .row > .performer-card.card {
+        width: calc(50% - 10px) !important;
+        max-width: calc(50% - 10px) !important;
+        min-width: 0 !important;
+    }
+}
+
+/* Phones: the age alone ("31", not "31 yrs") */
+@media (max-width: 767.98px) {
+    .sticky-yrs {
+        display: none;
+    }
+}

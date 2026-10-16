@@ -1,0 +1,781 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — navbar
+
+   Stash's navbar markup, for reference:
+     nav.top-nav
+       .navbar-collapse
+         .navbar-nav:first-child    ← the page menu (Scenes … Roles)
+         .navbar-nav:nth-child(2)   ← a second copy of the utility icons
+                                      Stash shows only on small screens
+       .navbar-brand                ← "Stash" logo, shown here as Home
+       .navbar-buttons              ← New, stats, settings, help,
+                                      logout, and the hamburger
+
+   The current page is marked with .sticky-current on the menu item by
+   nav-tabbar.js, and named on <body data-sticky-page> for the logo.
+   (Stash's own .active class only matches a page exactly, so it never
+   marks Home or a detail page like /scenes/98.)
+
+   Three layouts:
+     1200px and up   Netflix-style centred text menu, blur behind
+     576 – 1199px    Home + hamburger; menu opens as a panel
+     below 576px     floating icon tab bar at the bottom (phones)
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ═══ Shared ══════════════════════════════════════════════════════════ */
+
+nav.top-nav.navbar {
+    background: transparent !important;   /* beats Bootstrap's .bg-dark */
+    border: 0 !important;
+    box-shadow: none !important;
+    isolation: isolate;
+}
+nav.top-nav .navbar-collapse {
+    background: transparent !important;   /* Stash also puts .bg-dark here */
+}
+
+/* The blur layer behind the bar. No colour, just blur, fading out
+   towards the bar's bottom edge. It stays inside the bar so it never
+   blurs the toolbar sitting just below. */
+nav.top-nav.navbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(var(--nav-blur));
+    backdrop-filter: blur(var(--nav-blur));
+    -webkit-mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 70%, transparent 100%);
+}
+
+/* Stash offsets the page for its original bar height. Replace that with
+   one exact offset: the page starts right below our bar. */
+body {
+    padding-top: 0 !important;
+}
+.main.container-fluid {
+    margin-top: 0 !important;
+    padding-top: calc(var(--nav-height) + var(--page-gap)) !important;
+}
+
+/* Donate: Stash's own link to its Open Collective page (it opens in a
+   new tab), shown as the heart alone beside the other utility icons —
+   the "Donate" label is hidden and the heart takes the same colour as
+   the icons beside it; the link itself is untouched. It appears
+   wherever those icons do: the desktop button row
+   and the utility row of the tablet menu, but not the phone's More
+   panel. Stash wraps it in a .nav-link with 7px of padding each side,
+   which the other icons don't have; without it the heart sits on the
+   same 39px spacing as Statistics, Settings, Help and Log out. */
+nav.top-nav a[href*="opencollective"] {
+    padding: 0 !important;
+}
+nav.top-nav a[href*="opencollective"] .donate > span {
+    display: none !important;
+}
+nav.top-nav a[href*="opencollective"] .donate svg {
+    margin: 0 !important;
+    color: inherit !important;   /* Stash's #FF7373 → the icons' colour */
+}
+
+/* ── Page menu + Home: shared look ────────────────────────────────── */
+nav.top-nav .navbar-collapse > .navbar-nav:first-child .btn,
+nav.top-nav .navbar-brand .btn {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--text-muted) !important;
+    font-weight: 700;
+    border-radius: var(--radius-pill) !important;
+    transition: color var(--ease), background-color var(--ease);
+}
+nav.top-nav .navbar-collapse > .navbar-nav:first-child .btn:hover,
+nav.top-nav .navbar-brand .btn:hover {
+    color: var(--text) !important;
+    background: var(--pill-hover) !important;
+}
+
+/* Pill on the current page */
+nav.top-nav .navbar-collapse > .navbar-nav:first-child .sticky-current > .btn,
+body[data-sticky-page="home"] nav.top-nav .navbar-brand .btn {
+    color: #fff !important;
+    background: var(--pill-active) !important;
+}
+
+nav.top-nav .btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+    outline-offset: 2px;
+}
+
+/* Home: Stash's logo relabelled. The "Stash" text is hidden and
+   "Home" is drawn in its place. */
+nav.top-nav .navbar-brand {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+nav.top-nav .navbar-brand .btn {
+    font-size: 0 !important;
+}
+nav.top-nav .navbar-brand .btn::after {
+    content: "Home";
+    font-size: var(--nav-font-size);
+    line-height: 1.3;
+}
+
+/* ── Utility icons (stats, settings, help, logout) ────────────────── */
+/* Same grey as unselected menu text, in both places they appear. */
+nav.top-nav .navbar-buttons .btn.minimal,
+nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--text-muted) !important;
+    border-radius: var(--radius-pill) !important;
+    transition: color var(--ease), background-color var(--ease);
+}
+nav.top-nav .navbar-buttons .btn.minimal:hover,
+nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn:hover {
+    color: var(--text) !important;
+    background: var(--pill-hover) !important;
+}
+
+/* "New": translucent pill like "More Info" in the Netflix shot */
+nav.top-nav .navbar-buttons .btn-primary:not(.minimal) {
+    background: var(--pill-active) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    font-weight: 700;
+    border-radius: var(--radius-pill) !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    transition: background-color var(--ease);
+}
+nav.top-nav .navbar-buttons .btn-primary:not(.minimal):hover {
+    background: rgba(255, 255, 255, 0.32) !important;
+}
+
+nav.top-nav .navbar-toggler {
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--text-muted) !important;
+}
+
+/* ═══ Desktop: 1200px and up ══════════════════════════════════════════ */
+@media (min-width: 1200px) {
+    /* One fixed height, everything centred inside it */
+    nav.top-nav.navbar {
+        height: var(--nav-height);
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        align-items: center;
+        justify-content: center;          /* Home + menu as one centred group */
+        flex-wrap: nowrap;
+    }
+    nav.top-nav .navbar-collapse {
+        flex-grow: 0 !important;
+        flex-basis: auto !important;
+    }
+
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child {
+        gap: 0.5rem;
+    }
+    /* Stash wraps each item in a Bootstrap column with side padding;
+       zero it so the gap controls spacing on its own. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > * {
+        padding: 0 !important;
+    }
+    nav.top-nav .navbar-brand {
+        margin-right: 0.5rem !important;   /* same gap as between items */
+    }
+
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child .btn,
+    nav.top-nav .navbar-brand .btn {
+        display: inline-flex !important;
+        align-items: center;
+        padding: 0.45rem 1.2rem !important;
+        line-height: 1.3;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child .btn {
+        font-size: var(--nav-font-size);
+    }
+    /* Text only: hide the page icons */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child .btn svg {
+        display: none !important;
+    }
+
+    /* Right-hand icons pinned right so they don't pull the menu
+       off-centre */
+    nav.top-nav .navbar-buttons {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+
+/* ═══ Narrow desktop: 1200 – 1599px ══════════════════════════════════
+   The menu is centred on the whole window and the right-hand buttons
+   (New, donate, stats, settings, help, log out — 258px) are pinned on top of
+   it, which only works while the window has room for both. At 1200px
+   the menu ran 185–1092px and the buttons sat at 956–1175px, covering
+   136px of Tags and Roles; a 13-inch laptop is in this range.
+
+   Here the menu is centred in the space left of the buttons instead,
+   and the pills are tightened (smaller text via --nav-font-size, which
+   also sizes the "Home" label the brand draws with ::after, and less
+   padding). Measured at 1200px: clear of the buttons with room to spare. */
+@media (min-width: 1200px) and (max-width: 1599.98px) {
+    nav.top-nav {
+        --nav-font-size: 1.05rem;
+    }
+    nav.top-nav.navbar {
+        padding-left: 1rem !important;
+        /* the right-hand buttons are 258px wide (heart included) */
+        padding-right: calc(18.75rem + 1rem) !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child {
+        gap: 0.2rem;
+    }
+    nav.top-nav .navbar-brand {
+        margin-right: 0.2rem !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child .btn,
+    nav.top-nav .navbar-brand .btn {
+        padding: 0.45rem 0.8rem !important;
+    }
+}
+
+/* ═══ Tablet: 576 – 1199px ════════════════════════════════════════════ */
+@media (min-width: 576px) and (max-width: 1199.98px) {
+    nav.top-nav.navbar {
+        min-height: var(--nav-height);
+        align-items: center;
+    }
+    /* Menu button on the left, then the name of the page you're on
+       as plain text (no pill), then the utility icons on the right.
+       The menu button lives inside Stash's right-hand button group;
+       display:contents lets it and the icons take their places in
+       the bar directly, and `order` puts the button first. The name
+       is the current page's menu label, which nav-tabbar.js hands
+       over as --sticky-page-title; the link still goes to Home. */
+    nav.top-nav .navbar-buttons {
+        display: contents !important;
+    }
+    nav.top-nav .navbar-toggler {
+        order: -2;
+        margin: 0 0.35rem 0 0 !important;
+    }
+    nav.top-nav .navbar-brand {
+        order: -1;
+    }
+    nav.top-nav .navbar-buttons > :first-child {
+        margin-left: auto !important;
+    }
+    nav.top-nav .navbar-brand .btn,
+    body[data-sticky-page="home"] nav.top-nav .navbar-brand .btn,
+    nav.top-nav .navbar-brand .btn:hover {
+        padding: 0.4rem 0.5rem !important;
+        background: transparent !important;
+        color: var(--text) !important;
+    }
+    nav.top-nav .navbar-brand .btn::after {
+        content: var(--sticky-page-title, "Home");
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    /* Opened menu: a solid black panel so it's readable */
+    nav.top-nav .navbar-collapse.show,
+    nav.top-nav .navbar-collapse.collapsing {
+        background: rgba(0, 0, 0, 0.96) !important;
+        border-radius: var(--radius);
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    /* Page menu: text pills in Stash's grid */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > * {
+        padding: 0.25rem !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child .btn {
+        width: 100%;
+        padding: 0.75rem 0.5rem !important;
+        font-size: 1rem;
+        background: var(--bg-2) !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child .btn svg {
+        display: none !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child .btn:hover {
+        background: var(--bg-3) !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child .sticky-current > .btn {
+        background: var(--pill-active) !important;
+    }
+
+    /* Utility icons: one centred row under the pages */
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) {
+        flex-direction: row;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid var(--border);
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) > * {
+        padding: 0 !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn {
+        padding: 0.6rem 0.8rem !important;
+    }
+}
+
+/* ═══ Phone: below 576px — floating icon tab bar ══════════════════════ */
+/* Bar:  Home · Scenes · Images · Galleries · Performers · More
+   More: every other page (Studios, Tags, Roles, …) as labelled rows,
+         then stats, settings, help and logout.
+   The overflow pages stay in Stash's menu in the DOM; CSS just lifts
+   them out of the bar and lays them over the More panel when it's open. */
+@media (max-width: 575.98px) {
+    nav.top-nav {
+        --more-row: 2.75rem;                 /* height of one More row   */
+        --more-width: 13rem;                 /* width of the More panel  */
+        --more-pages: var(--sticky-more-pages, 3);                     /* overflow pages to make room for:
+                                                raise this if a plugin adds
+                                                another menu item */
+    }
+
+    /* The bar floats above the bottom edge, clear of the iPhone home
+       indicator (env() is 0 on devices without one). */
+    nav.top-nav.navbar {
+        --tabbar-fab: var(--tabbar-height);  /* the More button: a circle
+                                                exactly as tall as the bar,
+                                                which is what makes the
+                                                dock beside it narrower */
+        --tabbar-fab-gap: 0.6rem;            /* space between it and the pill */
+        top: auto !important;
+        bottom: max(var(--tabbar-gap), env(safe-area-inset-bottom)) !important;
+        left: var(--tabbar-gap) !important;
+        right: var(--tabbar-gap) !important;
+        height: var(--tabbar-height);
+        padding: 0 !important;
+        background: transparent !important;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: var(--tabbar-fab-gap);
+        box-shadow: none !important;
+    }
+    /* Glass: a heavy blur that picks up the colour behind it, a bright
+       hairline edge and a highlight along the top. The pill stops
+       short of the right so the More button can be a circle of its
+       own beside it. */
+    nav.top-nav.navbar::before {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: calc(var(--tabbar-fab) + var(--tabbar-fab-gap));
+        border-radius: var(--radius-pill);
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 12px 38px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        -webkit-backdrop-filter: blur(34px) saturate(190%);
+        backdrop-filter: blur(34px) saturate(190%);
+        -webkit-mask-image: none;
+        mask-image: none;
+    }
+
+    /* calc(): on the home screen (iOS) the page runs under the status
+       bar, and the inset is how tall it is; in a browser tab it's 0. */
+    .main.container-fluid {
+        padding-top: calc(env(safe-area-inset-top, 0px) + 1rem) !important;
+        padding-bottom: calc(var(--tabbar-height) + var(--tabbar-gap) * 2 + env(safe-area-inset-bottom) + 1rem) !important;
+    }
+
+    /* Order in the bar: Home, the pages, then More */
+    nav.top-nav .navbar-brand { order: -1; flex: 1 1 0; display: flex; justify-content: center; }
+    /* Stash wraps the logo's button in a plain link, which is inline
+       and therefore only as wide as its contents — so the button's
+       width: 100% had nothing to fill and Home's pill came out a
+       third of the width of the others. */
+    nav.top-nav .navbar-brand > a {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+    nav.top-nav .navbar-collapse { order: 0; }
+    /* The More button keeps its own width at the right, outside the pill */
+    nav.top-nav .navbar-buttons {
+        order: 1;
+        flex: 0 0 var(--tabbar-fab);
+        display: flex;
+        justify-content: center;
+        margin: 0 !important;
+    }
+
+    /* Keep the page menu permanently visible in the bar */
+    nav.top-nav .navbar-collapse,
+    nav.top-nav .navbar-collapse.collapsing {
+        display: flex !important;
+        flex: 3 1 0 !important;              /* the three menu pages; Home is
+                                                the logo and claims its own
+                                                equal share beside them */
+        height: auto !important;
+        max-height: none !important;
+        overflow: visible !important;
+        align-items: center;
+        align-self: stretch;                 /* full bar height…        */
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    /* …and everything inside centred in it, with any padding or margin
+       Stash adds zeroed so nothing nudges the icons off-centre. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child {
+        flex-direction: row !important;
+        flex-wrap: nowrap;
+        flex: 1 1 auto;
+        align-self: stretch;
+        align-items: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > * {
+        flex: 1 1 0 !important;
+        max-width: none !important;
+        width: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    /* The four in the bar are chosen by page (nav-tabbar.js marks
+       them as React draws the menu). Only a marked tab shows in the
+       bar, so anything else — including a page from a plugin whose
+       item won't take our markings — waits in the More panel instead
+       of turning up in the bar. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab) {
+        display: none !important;
+    }
+    /* Their places in the bar — set here only, so the desktop menu
+       keeps Stash's own order. */
+    nav.top-nav [data-sticky-order="0"] { order: 0; }
+    nav.top-nav [data-sticky-order="1"] { order: 1; }
+    nav.top-nav [data-sticky-order="2"] { order: 2; }
+    nav.top-nav [data-sticky-order="3"] { order: 3; }
+    body.sticky-no-home nav.top-nav .navbar-brand {
+        display: none !important;
+    }
+
+    /* Icon buttons: all the same size, icon dead centre. Bootstrap
+       utility classes on Stash's buttons (flex-column,
+       justify-content-between, mb-2) pushed icons to the top of the
+       circle, hence the !important overrides. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-tab .btn,
+    nav.top-nav .navbar-brand .btn,
+    nav.top-nav .navbar-toggler {
+        display: flex !important;
+        flex-direction: column !important;    /* icon over label */
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.2rem;
+        /* A pill, not a circle: it fills its share of the bar up to a
+           limit, so the selected page reads as a rounded tablet
+           behind the icon and its word. */
+        width: 100%;
+        max-width: var(--tabbar-pill-w);
+        height: var(--tabbar-pill-h);
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: var(--radius-pill) !important;
+    }
+    /* The page you're on: a soft light disc, as in the reference */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-tab.sticky-current .btn,
+    body[data-sticky-page="home"] nav.top-nav .navbar-brand .btn {
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: #fff !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child .btn svg,
+    nav.top-nav .navbar-toggler svg {
+        display: block !important;
+        width: var(--tabbar-icon-size);
+        height: var(--tabbar-icon-size);
+        margin: 0 !important;
+        flex-shrink: 0;
+    }
+    /* No words in the bar — the icons carry it, and dropping the
+       labels is what lets them be this large. The logo's own text
+       ("Stash") is sized away, and the ::after that draws "Home" on
+       wider screens is not needed here. */
+    body nav.top-nav .navbar-brand .btn {
+        font-size: 0 !important;
+    }
+    body nav.top-nav .navbar-brand .btn::after {
+        display: none !important;
+    }
+    /* Kept for screen readers, out of sight */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-tab .btn span {
+        position: absolute !important;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    /* ── Icons ────────────────────────────────────────────────────
+       One outline icon per page, drawn with a mask so it follows the
+       text colour. Stash's own icons step aside in the bar only. */
+    nav.top-nav .navbar-brand .btn svg,
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-tab .btn svg,
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab) .btn svg {
+        display: none !important;
+    }
+    /* The same outline set in the More panel, so a page looks the same
+       whether it is in the bar or in the list. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab) .btn::before {
+        content: "";
+        flex: 0 0 auto;
+        width: var(--tabbar-more-icon);
+        height: var(--tabbar-more-icon);
+        background-color: currentColor;
+        -webkit-mask: var(--sticky-nav-icon, var(--sticky-nav-fallback)) center / contain no-repeat;
+        mask: var(--sticky-nav-icon, var(--sticky-nav-fallback)) center / contain no-repeat;
+    }
+    body nav.top-nav .navbar-brand .btn::before,
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-tab .btn::before {
+        content: "";
+        width: var(--tabbar-icon-size);
+        height: var(--tabbar-icon-size);
+        background-color: currentColor;
+        -webkit-mask: var(--sticky-nav-icon, var(--sticky-nav-fallback)) center / contain no-repeat;
+        mask: var(--sticky-nav-icon, var(--sticky-nav-fallback)) center / contain no-repeat;
+    }
+    nav.top-nav .navbar-brand,
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > * {
+        --sticky-nav-fallback: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3C/svg%3E");
+    }
+    /* Home: a house, roof, walls and an arched door, in the same
+       stroke and size as the rest of the set */
+    nav.top-nav .navbar-brand,
+    nav.top-nav [data-sticky-key="home"] {
+        --sticky-nav-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 10.6 12 3.8l8.5 6.8'/%3E%3Cpath d='M5.8 9v9.7A1.8 1.8 0 0 0 7.6 20.5h8.8a1.8 1.8 0 0 0 1.8-1.8V9'/%3E%3Cpath d='M10 20.5v-4.7a2 2 0 0 1 4 0v4.7'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [data-sticky-key="scenes"] {
+        --sticky-nav-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M10.2 8.6l5.4 3.4-5.4 3.4z'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [data-sticky-key="images"] {
+        --sticky-nav-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4.5' width='18' height='15' rx='3'/%3E%3Ccircle cx='8.5' cy='9.5' r='1.7'/%3E%3Cpath d='M4 16.5l4.5-3.5 3.5 2.6 3-2.1 4 3'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [data-sticky-key="galleries"] {
+        --sticky-nav-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='7' width='13.5' height='13' rx='2.6'/%3E%3Cpath d='M7 4h10.5A3.5 3.5 0 0 1 21 7.5V17'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [data-sticky-key="performers"] {
+        --sticky-nav-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='3.6'/%3E%3Cpath d='M5 20c1.6-3.6 4.1-5.2 7-5.2s5.4 1.6 7 5.2'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [data-sticky-key="studios"] {
+        --sticky-nav-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='6.5' width='12' height='11' rx='2.6'/%3E%3Cpath d='M15 10.5l6-3v9l-6-3z'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [data-sticky-key="tags"] {
+        --sticky-nav-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 4.5h6.6l9.9 9.9-6.6 6.6-9.9-9.9z'/%3E%3Ccircle cx='7.6' cy='8.6' r='1.4'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [data-sticky-key="groups"],
+    nav.top-nav [data-sticky-key="movies"] {
+        --sticky-nav-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='14' rx='2.6'/%3E%3Cpath d='M3 10h18M3 14h18M8 5v14M16 5v14'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [data-sticky-key="markers"] {
+        --sticky-nav-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 20.5s6.5-5.4 6.5-10.5a6.5 6.5 0 1 0-13 0c0 5.1 6.5 10.5 6.5 10.5z'/%3E%3Ccircle cx='12' cy='10' r='2.4'/%3E%3C/svg%3E");
+    }
+
+    /* More button: only the hamburger stays in the right-hand group,
+       as its own glass circle beside the bar's icons */
+    nav.top-nav .navbar-buttons > *:not(.navbar-toggler) {
+        display: none !important;
+    }
+    /* A modern "more" mark: four rounded squares, in the same family
+       as the Home icon, instead of the old three bars. */
+    nav.top-nav .navbar-toggler:not(.sticky-open) .navbar-toggler-icon,
+    nav.top-nav .navbar-toggler svg {
+        display: none !important;
+    }
+    nav.top-nav .navbar-toggler::after {
+        content: "";
+        width: var(--tabbar-icon-size);
+        height: var(--tabbar-icon-size);
+        background-color: currentColor;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='3.5' width='7' height='7' rx='2.2'/%3E%3Crect x='13.5' y='3.5' width='7' height='7' rx='2.2'/%3E%3Crect x='3.5' y='13.5' width='7' height='7' rx='2.2'/%3E%3Crect x='13.5' y='13.5' width='7' height='7' rx='2.2'/%3E%3C/svg%3E") center / contain no-repeat;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='3.5' width='7' height='7' rx='2.2'/%3E%3Crect x='13.5' y='3.5' width='7' height='7' rx='2.2'/%3E%3Crect x='3.5' y='13.5' width='7' height='7' rx='2.2'/%3E%3Crect x='13.5' y='13.5' width='7' height='7' rx='2.2'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+
+    /* Its own glass circle, matching the pill */
+    /* A circle, not an oval: the shared rule above caps every bar
+       button at the pill's width, which squashed this one out of
+       round. It keeps its own size and a 1:1 shape. */
+    nav.top-nav .navbar-toggler {
+        flex: 0 0 auto !important;
+        width: var(--tabbar-fab) !important;
+        height: var(--tabbar-fab) !important;
+        min-width: var(--tabbar-fab) !important;
+        max-width: none !important;
+        aspect-ratio: 1 !important;
+        border-radius: 50% !important;
+        background: rgba(255, 255, 255, 0.07) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        box-shadow: 0 12px 38px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        -webkit-backdrop-filter: blur(34px) saturate(190%);
+        backdrop-filter: blur(34px) saturate(190%);
+    }
+    /* It gets the pill when you're on a page that lives inside More */
+    nav.top-nav:has(.navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab).sticky-current) .navbar-toggler {
+        color: #fff !important;
+        background: var(--pill-active) !important;
+    }
+
+    /* ── More panel ───────────────────────────────────────────────── */
+    /* The panel is Stash's utility group (stats, settings, help,
+       logout), with empty space reserved at the top for the overflow
+       pages, which are positioned into that space below. */
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) {
+        display: none !important;
+    }
+    /* Donate stays on the desktop bar only */
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) > a[href*="opencollective"] {
+        display: none !important;
+    }
+    nav.top-nav .navbar-collapse.show > .navbar-nav:nth-child(2) {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0;
+        position: absolute;
+        z-index: 1;
+        right: 0;
+        bottom: calc(100% + 0.5rem);
+        width: var(--more-width);
+        padding: calc(0.4rem + var(--more-pages) * var(--more-row) + 0.5rem) 0.4rem 0.4rem;
+        border-radius: 1.5rem;
+        /* Same glass as the bar */
+        background: rgba(20, 28, 42, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow: 0 10px 34px rgba(0, 0, 0, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.18);
+        -webkit-backdrop-filter: blur(28px) saturate(170%);
+        backdrop-filter: blur(28px) saturate(170%);
+    }
+    /* Thin divider between the pages and the utilities */
+    nav.top-nav .navbar-collapse.show > .navbar-nav:nth-child(2)::before {
+        content: "";
+        position: absolute;
+        left: 0.9rem;
+        right: 0.9rem;
+        top: calc(0.4rem + var(--more-pages) * var(--more-row) + 0.25rem);
+        height: 1px;
+        background: var(--border);
+    }
+
+    /* Overflow pages, lifted into the top of the panel, one row each.
+       Each row carries its own number (--sticky-more-i), so adding or
+       hiding a page can't shuffle the others. They are placed up from
+       the bar, past the utility rows below them; nav-tabbar.js counts
+       those rows as drawn (--sticky-more-utils: 4 normally, 3 without a
+       login, more if another plugin adds one), so an extra or missing
+       utility grows the panel instead of sliding under the pages. */
+    /* A page added by another plugin whose item won't carry our
+       markings has no row number of its own, so
+       it takes the last slot — which the count above already reserves.
+       Two such pages would share that slot; one is the norm. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not([data-sticky-key]) {
+        --sticky-more-i: var(--more-pages);
+    }
+
+    nav.top-nav .navbar-collapse.show > .navbar-nav:first-child > :not(.sticky-tab) {
+        display: flex !important;
+        position: absolute;
+        z-index: 2;
+        right: 0.4rem;
+        width: calc(var(--more-width) - 0.8rem) !important;
+        height: var(--more-row);
+        flex: none !important;
+        justify-content: flex-start !important;
+        bottom: calc(100% + 1.4rem +
+            (var(--sticky-more-utils, 4) + var(--more-pages) - var(--sticky-more-i, 1)) * var(--more-row));
+    }
+
+    /* Rows: icon + label, left aligned. Utilities have no visible text
+       in Stash, so their tooltip (title) is shown as the label. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab) .btn,
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 0.8rem;
+        width: 100%;
+        height: var(--more-row) !important;   /* beats Bootstrap's .h-100 */
+        padding: 0 0.8rem !important;
+        margin: 0 !important;
+        border-radius: 0.8rem !important;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) > * {
+        padding: 0 !important;
+        width: 100%;
+    }
+    /* Statistics, Settings, Help and Log out: the same outline set, at
+       the same size, as the pages above them. They were wearing
+       Stash's solid glyphs at the bar's icon size, which made them
+       bigger and heavier than every other row in the panel. */
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn svg {
+        display: none !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn[title]::before {
+        content: "";
+        flex: 0 0 auto;
+        width: var(--tabbar-more-icon);
+        height: var(--tabbar-more-icon);
+        background-color: currentColor;
+        -webkit-mask: var(--sticky-util-icon, var(--sticky-nav-fallback)) center / contain no-repeat;
+        mask: var(--sticky-util-icon, var(--sticky-nav-fallback)) center / contain no-repeat;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn[title]::after {
+        content: attr(title);
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1;
+    }
+    /* Named by their tooltip, which is what Stash gives them */
+    nav.top-nav [title="Statistics"] {
+        --sticky-util-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20V10M10 20V4M16 20v-7M22 20H2'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [title="Settings"] {
+        --sticky-util-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3.2'/%3E%3Cpath d='M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2L5.5 5.5'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [title="Help"] {
+        --sticky-util-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M9.6 9.4a2.5 2.5 0 1 1 3 2.4v1.4'/%3E%3Cpath d='M12 16.6h.01'/%3E%3C/svg%3E");
+    }
+    nav.top-nav [title="Log out"] {
+        --sticky-util-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 4h3.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H15'/%3E%3Cpath d='M10 8l-4 4 4 4M6 12h9'/%3E%3C/svg%3E");
+    }
+}
+
+/* ═══ Accessibility ═══════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+    nav.top-nav .btn {
+        transition: none !important;
+    }
+}
+/* Users who've asked their OS for less transparency get a solid bar */
+@media (prefers-reduced-transparency: reduce) {
+    nav.top-nav.navbar::before {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        -webkit-mask-image: none;
+        mask-image: none;
+        background: var(--bg-0);
+        inset: 0;
+    }
+}

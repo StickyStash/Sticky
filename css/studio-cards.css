@@ -1,0 +1,234 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — studio cards (CSS only; everything is already on the card)
+
+   logo, whole and centred on a 4:3 tile
+   name
+   "Part of …" / "Parent of …"
+   counts (pinned to the bottom)
+
+   Logos aren't photos: they're often wide, transparent or dark, so
+   unlike gallery covers they're never cropped; they're fitted inside
+   the tile with breathing room instead.
+   ─────────────────────────────────────────────────────────────────── */
+
+.studio-card {
+    --studio-gap: 14px;
+}
+
+/* ── Card: same as the other cards ────────────────────────────────── */
+.studio-card.card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--card-radius) !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    transition: background-color var(--ease), border-color var(--ease);
+}
+/* Stash pads every .card by 20px; the other card types drop it, and
+   left here it framed the logo tile inside the card instead of letting
+   it run edge to edge like a performer's photo */
+.studio-card.card {
+    padding: 0 !important;
+}
+/* …so a card with no counts row closes itself */
+.studio-card.card:not(:has(.card-popovers)) .card-section {
+    padding-bottom: var(--card-pad) !important;
+}
+.studio-card.card:hover {
+    background: var(--card-bg-hover) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* Stash sets each card's width from the zoom slider, but not on the
+   home page carousels. There the card sized itself from its contents,
+   and the logo sized itself from the card: a loop the browser settled
+   by using the logo file's full width, so one tile filled the page.
+   Cards without a set width get a fixed one, like the other cards. */
+.studio-card:not([style*="width"]) {
+    width: 20rem;
+    max-width: 100%;
+}
+
+/* ── Logo tile ────────────────────────────────────────────────────── */
+.studio-card .thumbnail-section {
+    position: relative;
+    height: auto !important;
+}
+/* The logo is placed in a fixed frame inside the tile and fitted with
+   object-fit, rather than capped with max-height: 100%. iPhone Safari
+   doesn't resolve that percentage against a height that comes from
+   aspect-ratio, so a squarer logo grew to its full width,
+   pushed the tile taller, and — every card in a home row being as tall
+   as the tallest — made the whole row taller. The frame is the same
+   space the old padding left: 12% in from the sides, 14% of the width
+   (18.67% of the height) in from the top and bottom. */
+.studio-card .studio-card-header {
+    position: relative;
+    display: block !important;
+    aspect-ratio: 4 / 3;
+    height: auto !important;
+    min-height: 0;
+    padding: 0;
+    background: rgba(255, 255, 255, 0.035);   /* subtle tile behind the logo */
+}
+.studio-card .studio-card-image {
+    position: absolute;
+    left: 12%;
+    top: 18.67%;
+    display: block;
+    width: 76% !important;
+    height: 62.66% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: contain !important;
+    transition: transform 0.25s ease;
+}
+.studio-card:hover .studio-card-image {
+    transform: scale(1.03);   /* a gentle nudge on hover */
+}
+
+/* ── Body: name, then the parent / child studio line ──────────────── */
+.studio-card .card-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--studio-gap);
+    padding: var(--card-pad) var(--card-pad) 0 !important;
+}
+.studio-card .card-section-title {
+    margin: 0 !important;
+    font-size: 1.25rem !important;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+}
+.studio-card .card-section > a,
+.studio-card .card-section > a:hover {
+    color: var(--text);
+    text-decoration: none;
+}
+.studio-card .studio-card__details {
+    margin: 0 !important;
+}
+.studio-card .studio-card__details > * {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.62);   /* same grey as dates on the other cards */
+}
+.studio-card .studio-card__details a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    transition: color var(--ease);
+}
+.studio-card .studio-card__details a:hover {
+    color: var(--text);
+}
+.studio-card .studio-card__details:empty {
+    display: none;
+}
+/* "Parent of Studio A, Studio B" drawn by studio-cards.js. Once it's
+   there, Stash's own "Parent of 1 Studio" line (anything in the
+   details block other than the "Part of…" line) is hidden. */
+.sticky-studio-children {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.62);
+}
+.studio-card .card-section:has(.sticky-studio-children) .studio-card__details > :not(.studio-parent-studios) {
+    display: none !important;
+}
+.studio-card .card-section:has(.sticky-studio-children) .studio-card__details:not(:has(.studio-parent-studios)) {
+    display: none !important;
+}
+.sticky-studio-rel-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    text-decoration: none !important;
+    transition: color var(--ease);
+}
+.sticky-studio-rel-link:hover {
+    color: var(--text) !important;
+}
+.sticky-studio-rel-more {
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+    cursor: default;
+}
+
+/* ── Counts: left aligned, pinned to the bottom ───────────────────── */
+.studio-card > hr {
+    display: none !important;
+}
+.studio-card .card-popovers {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start !important;
+    gap: 0.5rem;
+    margin: auto 0 0 !important;          /* pinned to the bottom */
+    /* The count buttons have 6px of padding inside, so the row starts
+       6px further left to line the icons up with the text above */
+    padding: var(--studio-gap) var(--card-pad) var(--card-pad) calc(var(--card-pad) - 6px) !important;
+    border: 0 !important;
+}
+.studio-card .card-popovers .btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0 6px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--text-muted) !important;
+    font-size: 0.88rem !important;
+}
+.studio-card .card-popovers .btn:hover {
+    color: var(--text) !important;
+}
+.studio-card .card-popovers .btn svg {
+    margin: 0 !important;
+}
+
+/* ── Favourites: white heart, faint pink tile (as performer cards) ── */
+.studio-card .favorite-button {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.studio-card .favorite-button svg {
+    width: 1.3rem !important;
+    height: 1.3rem !important;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+}
+.studio-card .favorite-button.favorite {
+    color: #fff !important;
+}
+.studio-card.card:has(.favorite-button.favorite) {
+    background: rgba(242, 167, 199, 0.13) !important;
+    border-color: rgba(242, 167, 199, 0.38) !important;
+}
+.studio-card.card:has(.favorite-button.favorite):hover {
+    background: rgba(242, 167, 199, 0.17) !important;
+    border-color: rgba(242, 167, 199, 0.5) !important;
+}
+
+/* ── Phones: one line each, fading out at the edge ────────────────
+   The name and the "Part of" / "Parent of" lines never wrap; a long
+   one fades out at the card's edge, as performer names do on scene
+   cards. */
+@media (max-width: 767.98px) {
+    .studio-card .card-section-title,
+    .studio-card .studio-card__details > *,
+    .studio-card .sticky-studio-children {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.75rem), transparent);
+        mask-image: linear-gradient(to right, #000 calc(100% - 1.75rem), transparent);
+    }
+    /* Stash's own two-line clamp inside the name */
+    .studio-card .card-section-title *,
+    .studio-card .studio-card__details * {
+        display: inline !important;
+        white-space: nowrap !important;
+        -webkit-line-clamp: unset !important;
+    }
+}

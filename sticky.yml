@@ -1,0 +1,59 @@
+name: Sticky
+description: A deep-blue theme for Stash — redesigned cards, detail pages, toolbars and Settings, a phone layout with a bottom tab bar, and a Categories view for tags.
+version: 1.0.0
+ui:
+  javascript:
+    - js/sticky.js
+    - js/sticky-cards.js
+    - js/page-actions.js
+    - js/nav-tabbar.js
+    - js/scene-cards.js
+    - js/list-toolbar.js
+    - js/performer-cards.js
+    - js/performer-page.js
+    - js/gallery-cards.js
+    - js/image-cards.js
+    - js/marker-cards.js
+    - js/group-cards.js
+    - js/group-page.js
+    - js/home-rows.js
+    - js/studio-page.js
+    - js/tag-data.js
+    - js/tag-categories.js
+    - js/tag-page.js
+    - js/status-bar.js
+    - js/mobile-header.js
+  css:
+    - css/tokens.css
+    - css/components.css
+    - css/page-actions.css
+    - css/navbar.css
+    - css/cards.css
+    - css/performer-cards.css
+    - css/performer-page.css
+    - css/gallery-cards.css
+    - css/studio-cards.css
+    - css/image-cards.css
+    - css/marker-cards.css
+    - css/group-cards.css
+    - css/group-page.css
+    - css/studio-page.css
+    - css/scene-page.css
+    - css/tag-categories.css
+    - css/tag-page.css
+    - css/mobile-chrome.css
+    - css/mobile-header.css
+    - css/home.css
+    - css/settings.css
+    - css/toolbar.css
+    - css/tagger.css
+    - css/menus.css
+    - css/sidebar.css
+    - css/focus.css
+  assets:
+    /: assets
+settings:
+  tabBar:
+    displayName: Phone tab bar
+    description: "Which four pages sit in the bar, in order. For example: home, scenes, images, performers. Everything else goes in the More menu."
+    type: STRING

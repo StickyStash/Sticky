@@ -1,0 +1,13 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — phone status bar (status-bar.js)
+
+   Added to the home screen on iOS, the page is allowed to run under
+   the status bar so the page's blue reaches the top of the screen.
+   The page starts below the status bar: navbar.css pads
+   .main.container-fluid by the inset. (A padding on <body> had been
+   overruled by navbar.css's body { padding-top: 0 !important }, which
+   is why the page title sat under the clock.) The status bar shows
+   the page's own blue behind it, so it matches the top of the page;
+   cards scrolled up pass behind the clock, as in any iPhone web app.
+   In a browser tab the inset is zero, so nothing moves.
+   ─────────────────────────────────────────────────────────────────── */

@@ -1,0 +1,97 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — login page (optional)
+
+   Stash's login page is a separate, plain HTML page that loads before
+   any plugin does, so the theme itself can't reach it. The one thing
+   that page does load is your Custom CSS. To match it to Sticky:
+
+     1. Settings → Interface → Custom CSS
+     2. Paste this whole file in, tick "Custom CSS enabled", and save.
+
+   Everything here is scoped to body.login, because Stash loads the same
+   Custom CSS into the main app as well — so it changes nothing else.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* The page gradient. It goes on <html> wherever the browser can find
+   the login page from there (:has), for two reasons: iPhone Safari
+   colours its status bar from <html>'s background colour, and on a
+   phone Stash's login styles make the page shorter than the screen,
+   so a gradient on <body> would stop partway down. The second layer
+   is solid dark navy below the gradient. */
+body.login {
+    background: #0d1520 linear-gradient(to bottom, #1f3350 0%, #122032 45%, #0d1520 100%) no-repeat;
+    background-size: 100% 100vh;
+    color: rgba(255, 255, 255, 0.95);
+}
+@supports selector(:has(a)) {
+    html:has(body.login) {
+        min-height: 100%;
+        background-color: #1f3350;
+        background-image:
+            linear-gradient(to bottom, #1f3350 0%, #122032 45%, #0d1520 100%),
+            linear-gradient(#0d1520, #0d1520);
+        background-size: 100% 100vh, 100% 100%;
+        background-position: 0 0, 0 100vh;
+        background-repeat: no-repeat;
+    }
+    body.login {
+        background: transparent;
+    }
+}
+
+body.login .card {
+    min-width: 300px;
+    padding: 28px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+body.login h6 {
+    color: rgba(255, 255, 255, 0.65);
+    font-weight: 600;
+}
+
+body.login .text-input,
+body.login .text-input:focus {
+    height: 2.6rem;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    box-shadow: none;
+    color: #fff;
+}
+body.login .text-input:focus {
+    background-color: rgba(255, 255, 255, 0.12);
+    outline: 2px solid rgba(255, 255, 255, 0.35);
+    outline-offset: 1px;
+}
+body.login .text-input::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+/* A password manager's autofill paints the fields pale blue */
+body.login .text-input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 100px #1a2a40 inset;
+    -webkit-text-fill-color: #fff;
+    caret-color: #fff;
+}
+
+body.login .btn-primary {
+    padding: 0.5rem 1.4rem;
+    background-color: rgba(255, 255, 255, 0.92);
+    border: 0;
+    border-radius: 8px;
+    color: #0d1520;
+    font-weight: 600;
+    cursor: pointer;
+}
+body.login .btn-primary:hover,
+body.login .btn-primary:focus {
+    background-color: #fff;
+}
+
+body.login .login-error {
+    color: #ff8a8f;
+}

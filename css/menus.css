@@ -1,0 +1,76 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — dropdown menus (sort list, "…" menu, Saved, and every other
+   Bootstrap dropdown in Stash): same colours as the toolbar buttons,
+   rounded to match.
+   ─────────────────────────────────────────────────────────────────── */
+
+.dropdown-menu {
+    background: var(--surface-solid) !important;
+    border: 1px solid var(--surface-border) !important;
+    border-radius: var(--radius) !important;
+    padding: 0.35rem !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+}
+
+.dropdown-menu .dropdown-item {
+    border-radius: var(--radius-sm);
+    padding: 0.45rem 0.8rem;
+    color: var(--text-muted) !important;
+    background: transparent !important;
+    font-weight: 600;
+    transition: color var(--ease), background-color var(--ease);
+}
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus {
+    color: var(--text) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+/* The currently chosen option (e.g. the active sort) */
+.dropdown-menu .dropdown-item.active,
+.dropdown-menu .dropdown-item:active {
+    color: #fff !important;
+    background: var(--pill-active) !important;
+}
+.dropdown-menu .dropdown-divider {
+    border-top-color: var(--surface-border);
+    margin: 0.35rem 0;
+}
+.dropdown-menu .dropdown-header {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   Hover popovers — the list behind "+N" on a card, and Stash's own
+   card popovers. Same surface as the dropdown menus above, so a
+   popover and a menu look like the same object.
+   ─────────────────────────────────────────────────────────────────── */
+.popover.hover-popover-content {
+    padding: 0.4rem !important;
+    background: var(--surface-solid) !important;
+    border: 1px solid var(--surface-border) !important;
+    border-radius: var(--radius) !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    color: var(--text);
+    font-family: inherit;
+}
+.popover.hover-popover-content .popover-body,
+.popover.hover-popover-content .popover-header {
+    padding: 0.3rem 0.4rem;
+    background: transparent !important;
+    border: 0 !important;
+    color: var(--text);
+}
+
+/* The little arrow. Bootstrap draws it as two triangles — a border
+   one behind a fill one — and names them by which side the popover
+   sits on, so each side needs its own colour. */
+.popover.hover-popover-content > .arrow::before { border-color: transparent !important; }
+.bs-popover-top.hover-popover-content > .arrow::after { border-top-color: var(--surface-solid) !important; }
+.bs-popover-bottom.hover-popover-content > .arrow::after { border-bottom-color: var(--surface-solid) !important; }
+.bs-popover-left.hover-popover-content > .arrow::after { border-left-color: var(--surface-solid) !important; }
+.bs-popover-right.hover-popover-content > .arrow::after { border-right-color: var(--surface-solid) !important; }
+.bs-popover-bottom.hover-popover-content .popover-header::before { border-bottom-color: transparent !important; }

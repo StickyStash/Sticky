@@ -1,0 +1,823 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — list toolbar (Scenes page layout)
+
+   Row 1  search · sort · Filters · Saved · sidebar
+   Row 2  grid/list/wall · zoom · | · Tagger · …
+   Row 3  Play · 94 scenes · 39h 18m · 27.9 GiB      40 per page · ‹ 1 of 3 ›
+
+   Stash spreads these controls over several containers (the sidebar
+   button sits outside the toolbar; the results line and pages sit
+   below it). `display: contents` removes those wrappers from the
+   layout, so every control becomes a direct item of one flex area and
+   can be placed on the right row with `order`. Nothing is moved in the
+   DOM. This also means the toolbar scrolls with the page (not pinned).
+
+   Scoped to lists that have Stash's newer sidebar layout (Scenes).
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── The flex area ────────────────────────────────────────────────── */
+div:has(> .filtered-list-toolbar) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    /* Centred on the page, the way Stash has it. We had flattened the
+       toolbar into this flex area and left it aligned left. */
+    justify-content: center;
+    /* Rows stack at the top. By default a wrapping flex area shares
+       spare height out between its rows; when the sidebar made this
+       area taller than its content (short lists, e.g. a performer's
+       Galleries tab), that opened big gaps between the toolbar rows. */
+    align-content: flex-start;
+    column-gap: 0.5rem;
+    row-gap: 0;          /* rows are spaced by item margins instead, see below */
+}
+/* Anything not placed below (card grid, footer, plugin additions)
+   goes after the three rows, full width. */
+:where(div:has(> .filtered-list-toolbar) > *) {
+    order: 90;
+    flex-basis: 100%;
+}
+
+/* Wrappers removed from the layout */
+div:has(> .filtered-list-toolbar) > .filtered-list-toolbar,
+div:has(> .filtered-list-toolbar) > .pagination-index-container,
+div:has(> .filtered-list-toolbar) > .sidebar-toggle-button-container,
+.filtered-list-toolbar > .btn-group:has(.filter-button),
+.filtered-list-toolbar > .list-operations,
+.filtered-list-toolbar > .list-operations > .btn-group,
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) {
+    display: contents !important;
+}
+
+/* One row break, before the results line. The controls above it used
+   to be forced onto two rows; now they flow into one and wrap by
+   themselves only when they genuinely don't fit — so a wide window
+   gets a single row of buttons, and a narrow one breaks where it
+   must. */
+div:has(> .filtered-list-toolbar)::after {
+    content: "";
+    flex-basis: 100%;
+    height: 0;
+    order: 29;
+}
+
+/* Unplaced toolbar controls (e.g. the "selected" controls Stash shows
+   when you tick cards) land at the end of row 1. :where() gives these
+   defaults zero specificity, so the placements below always win. */
+:where(.filtered-list-toolbar > *,
+        .filtered-list-toolbar > .list-operations > .btn-group > *) {
+    order: 15;
+    flex-basis: auto;
+}
+
+/* Bootstrap gives buttons inside its button groups `flex: 1 1 auto`,
+   which made them stretch to fill each row once the groups were
+   flattened. That fills narrow screens nicely, but on wide ones the
+   controls should keep their natural size. */
+div:has(> .filtered-list-toolbar)
+    :is(.btn, .dropdown, .search-term-input, .zoom-slider-container, .page-size-selector) {
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+}
+
+/* ── Placement ────────────────────────────────────────────────────── */
+/* Row 1: search · sort · … │ filters · saved · sidebar │ views … */
+.filtered-list-toolbar > .search-term-input                     { order: 10; }
+.filtered-list-toolbar > .sort-by-select                        { order: 11; }
+.filtered-list-toolbar .list-operations.dropdown                { order: 12; }
+.filtered-list-toolbar .filter-button                           { order: 13; }
+.filtered-list-toolbar .saved-filter-dropdown                   { order: 14; }
+.sidebar-pane-content > .sidebar-toggle-button-container > *    { order: 15; }
+
+/* Row 2: view modes (grid, list, wall), zoom, then Tagger and … */
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn {
+    order: 20;
+}
+.filtered-list-toolbar > .zoom-slider-container                 { order: 21; }
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(4) {
+    order: 22;
+}
+
+/* Row 3: Play, results … page size, pages */
+.filtered-list-toolbar .play-button                             { order: 30; }
+.pagination-index-container > .sticky-results,
+.pagination-index-container > .filter-container                 { order: 31; }
+.filtered-list-toolbar > .page-size-selector                    { order: 32; margin-left: auto; }
+.pagination-index-container > .sticky-pager,
+.pagination-index-container > .pagination                       { order: 33; }
+
+/* ── Row spacing ──────────────────────────────────────────────────
+   The invisible row breaks are rows of their own, so a flex row-gap
+   was counted twice around them but once where a row wrapped
+   naturally (e.g. search on phones), making gaps uneven. Instead,
+   every control gets half the gap above and below it: any two rows
+   end up exactly --tb-row-gap apart, however they were split. */
+div:has(> .filtered-list-toolbar) {
+    --tb-row-gap: 1.2rem;
+    --tb-results-gap: 2.1rem;      /* the results row sits further away */
+}
+.filtered-list-toolbar > *,
+.filtered-list-toolbar .filter-button,
+.filtered-list-toolbar .saved-filter-dropdown,
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn,
+.filtered-list-toolbar > .list-operations > .btn-group > *,
+.sidebar-pane-content > .sidebar-toggle-button-container > *,
+.pagination-index-container > * {
+    margin-top: calc(var(--tb-row-gap) / 2) !important;
+    margin-bottom: calc(var(--tb-row-gap) / 2) !important;
+}
+/* Results row: larger gap above it (prefixed so it outranks the
+   general rule above) */
+div:has(> .filtered-list-toolbar) .filtered-list-toolbar .play-button,
+div:has(> .filtered-list-toolbar) .filtered-list-toolbar > .page-size-selector,
+div:has(> .filtered-list-toolbar) .pagination-index-container > * {
+    margin-top: calc(var(--tb-results-gap) - var(--tb-row-gap) / 2) !important;
+}
+/* The card grid is a Bootstrap .row, which normally has negative side
+   margins so it lines up with the page edges. As a full-width flex item
+   those margins made it narrower than it should be, so Stash sized the
+   cards too small. Letting it grow into the space the margins free up
+   restores its natural width whatever the margins are: -15px on
+   desktop, but zero on phones, where a fixed +30px made the grid wider
+   than the screen and caused sideways scrolling. */
+div:has(> .filtered-list-toolbar) > .row {
+    flex: 1 1 100%;
+    max-width: none;
+    /* Never wider than the page: on phones a marker card's preview
+       video asked for 366px in a 361px column, the grid grew to hold
+       it, and every marker card came out 18px wider than a scene card
+       and off-centre. */
+    min-width: 0;
+}
+
+/* Trim the half-gaps at the very top and bottom of the toolbar */
+div:has(> .filtered-list-toolbar) {
+    margin-top: calc(var(--tb-row-gap) / -2);
+}
+div:has(> .filtered-list-toolbar) > .row {
+    margin-top: calc(var(--tb-row-gap) / 2);
+}
+
+/* ── Shared control look ──────────────────────────────────────────── */
+.filtered-list-toolbar .btn,
+.sidebar-pane-content .sidebar-toggle-button {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    height: 2.4rem;
+    min-width: 2.4rem;
+    padding: 0 0.85rem !important;
+    border: 0 !important;
+    border-radius: var(--radius-sm) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: color var(--ease), background-color var(--ease);
+}
+.filtered-list-toolbar .btn:hover,
+.sidebar-pane-content .sidebar-toggle-button:hover {
+    background: rgba(255, 255, 255, 0.14) !important;
+    color: var(--text) !important;
+}
+.filtered-list-toolbar .btn:focus-visible,
+.sidebar-pane-content .sidebar-toggle-button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+    outline-offset: 2px;
+}
+.filtered-list-toolbar .btn svg {
+    margin: 0 !important;
+}
+/* Sidebar button: Stash pins it absolutely at the far left; put it
+   back in the flow so it sits in row 1 instead of overlapping. */
+.sidebar-pane-content .sidebar-toggle-button {
+    position: static !important;
+    margin: 0 !important;
+    transform: none !important;
+}
+
+/* Icon-only buttons stay square */
+.sidebar-pane-content .sidebar-toggle-button,
+.filtered-list-toolbar .list-operations.dropdown > .btn {
+    padding: 0 !important;
+    width: 2.4rem;
+}
+
+/* ── Row 1 ────────────────────────────────────────────────────────── */
+/* Search: rounded field with a magnifier */
+.filtered-list-toolbar > .search-term-input {
+    width: 16rem;
+    max-width: 100%;
+}
+.filtered-list-toolbar > .search-term-input input {
+    height: 2.4rem;
+    padding-left: 2.3rem !important;
+    border: 0 !important;
+    border-radius: var(--radius-sm) !important;
+    background: rgba(255, 255, 255, 0.12)
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.6)' stroke-width='2.2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='M16 16l4 4'/%3E%3C/svg%3E")
+        no-repeat 0.8rem center / 1rem !important;
+    color: var(--text) !important;
+    box-shadow: none !important;
+    font-size: 0.95rem;
+}
+.filtered-list-toolbar > .search-term-input input::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+/* ── The clear "✕" inside a search field ──────────────────────────
+   Stash builds it as <Button variant="secondary">, so Bootstrap gives
+   it a 1px border, a 3.5px radius and an opaque #394B59 fill: a small
+   rounded-grey square floating inside our flat search box, inset
+   10.5px from the right edge by its own margin so it never lines up
+   with the field. Strip the button back to its glyph, make the glyph
+   white and let it fill the field's right end, so it reads as part of
+   the search box rather than a control sitting on top of it. This
+   component is only ever the ✕ in a search field, so it is worth
+   fixing everywhere it appears rather than in the toolbar alone. */
+.clearable-input-group .clearable-text-field-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    opacity: 0.7;
+    transition: opacity 0.15s ease;
+}
+.clearable-input-group .clearable-text-field-clear:hover,
+.clearable-input-group .clearable-text-field-clear:focus,
+.clearable-input-group .clearable-text-field-clear:active,
+.clearable-input-group
+    .clearable-text-field-clear:not(:disabled):not(.disabled):active {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    opacity: 1;
+}
+/* Leave room for it, so a long query doesn't run underneath the ✕. */
+.clearable-input-group .clearable-text-field {
+    padding-right: 2.6rem !important;
+}
+
+/* Sort: "Date" + direction arrow, joined into one control */
+.filtered-list-toolbar > .sort-by-select {
+    display: inline-flex;
+}
+.filtered-list-toolbar > .sort-by-select .input-group-prepend {
+    margin: 0;
+}
+.filtered-list-toolbar > .sort-by-select .dropdown-toggle {
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+    padding-right: 0.4rem !important;
+}
+.filtered-list-toolbar > .sort-by-select .dropdown-toggle::after {
+    display: none;   /* Bootstrap's caret; the arrow button follows */
+}
+.filtered-list-toolbar > .sort-by-select > .btn {
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+    padding: 0 0.7rem 0 0.3rem !important;
+    min-width: 0;
+}
+
+/* Filters and Saved are icons only, so a phone fits the whole control
+   row on one line. The Filters button still widens when it carries a
+   count of active filters. */
+.filtered-list-toolbar .filter-button,
+.filtered-list-toolbar .saved-filter-dropdown > .dropdown-toggle {
+    width: 2.4rem;
+    padding: 0 !important;
+}
+.filtered-list-toolbar .filter-button:has(.badge) {
+    width: auto;
+    gap: 0.4rem;
+    padding: 0 0.6rem !important;
+}
+.filtered-list-toolbar .filter-button > svg {
+    order: 0;
+}
+/* Active-filter count: a small chip after "Filters" instead of
+   Bootstrap's tiny corner badge */
+.filtered-list-toolbar .filter-button .badge {
+    order: 2;
+    position: static !important;
+    transform: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.4rem;
+    height: 1.4rem;
+    margin: 0 !important;
+    padding: 0 0.4rem;
+    border-radius: var(--radius-pill);
+    background: var(--pill-active) !important;
+    color: #fff !important;
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1;
+}
+/* Bootstrap's caret, which the label used to replace */
+.filtered-list-toolbar .saved-filter-dropdown > .dropdown-toggle::after {
+    display: none;
+}
+
+/* ── Row 2 ────────────────────────────────────────────────────────── */
+/* View modes: grid, list, wall as one segmented control */
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(-n+3) {
+    width: 2.6rem;
+    padding: 0 !important;
+    border-radius: 0 !important;
+}
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:first-child {
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(3) {
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+    margin-right: 0.5rem;
+}
+/* The flex gap would split the segments apart; pull them together */
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(2),
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(3) {
+    margin-left: -0.5rem;
+}
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn.active {
+    background: var(--pill-active) !important;
+    color: #fff !important;
+}
+
+/* Tagger: outlined, with a label and a divider before it */
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(4) {
+    position: relative;
+    margin-left: 1.5rem;
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(4)::after {
+    content: "Tagger";
+}
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(4)::before {
+    content: "";
+    position: absolute;
+    left: calc(-1rem - 1px);
+    top: 20%;
+    height: 60%;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.16);
+}
+.filtered-list-toolbar > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(4).active {
+    background: var(--pill-active) !important;
+    color: #fff !important;
+}
+
+/* Zoom: slim slider between a small and a large grid icon */
+.filtered-list-toolbar > .zoom-slider-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 !important;
+    padding: 0 0.25rem !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--text-muted);
+}
+.filtered-list-toolbar > .zoom-slider-container::before,
+.filtered-list-toolbar > .zoom-slider-container::after {
+    content: "";
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.filtered-list-toolbar > .zoom-slider-container::before { width: 0.7rem;  height: 0.7rem; }
+.filtered-list-toolbar > .zoom-slider-container::after  { width: 1.05rem; height: 1.05rem; }
+
+.filtered-list-toolbar .zoom-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 4.5rem;
+    height: 14px;                        /* thumb height; track is drawn below */
+    margin: 0;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;  /* was the grey box */
+    box-shadow: none !important;
+}
+.filtered-list-toolbar .zoom-slider::-webkit-slider-runnable-track {
+    height: 4px;
+    border: 0;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.16) !important;
+}
+.filtered-list-toolbar .zoom-slider::-moz-range-track {
+    height: 4px;
+    border: 0;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.16);
+}
+.filtered-list-toolbar .zoom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    margin-top: -5px;                    /* centre on the 4px track */
+    border: 0;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+}
+.filtered-list-toolbar .zoom-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+}
+.filtered-list-toolbar .zoom-slider::-moz-range-progress {
+    height: 4px;
+    border-radius: 2px;
+    background: var(--text-muted);
+}
+
+/* ── Row 3 ────────────────────────────────────────────────────────── */
+/* Play: pill with the same fill as the search field */
+.filtered-list-toolbar .play-button {
+    flex-grow: 0 !important;
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: var(--text) !important;
+    border-radius: var(--radius-pill) !important;
+    padding: 0 1.2rem 0 1rem !important;
+    font-weight: 700;
+}
+.filtered-list-toolbar .play-button:hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    color: #fff !important;
+}
+.filtered-list-toolbar .play-button::after {
+    content: "Play";
+}
+
+/* Page size: "40 per page ▾". The select is sized to the number of
+   digits actually chosen (20 → 2, 120 → 3, 1000 → 4), and the label
+   sits right after the number, so the gaps around it are the same as
+   everywhere else in the row. The select stretches under the label,
+   so clicking the label still opens it. */
+.filtered-list-toolbar > .page-size-selector {
+    --pp-digits: 2;
+    --pp-label: 5.2rem;                      /* room for "per page ▾" */
+    position: relative;
+    font-size: 0.95rem;                      /* so `ch` matches the select */
+    font-weight: 600;
+}
+/* --pp-digits is set by list-toolbar.js from the chosen size */
+.filtered-list-toolbar > .page-size-selector select {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 2.4rem;
+    width: calc(var(--pp-digits) * 1ch + var(--pp-label)) !important;
+    padding: 0 var(--pp-label) 0 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--text-muted) !important;
+    box-shadow: none !important;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 2.4rem;
+    cursor: pointer;
+}
+.filtered-list-toolbar > .page-size-selector:hover select,
+.filtered-list-toolbar > .page-size-selector:hover::after {
+    color: var(--text) !important;
+}
+.filtered-list-toolbar > .page-size-selector::after {
+    content: "per page ▾";
+    position: absolute;
+    left: calc(var(--pp-digits) * 1ch + 0.35rem);
+    top: 50%;
+    transform: translateY(-50%);
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;                    /* clicks go through to the select */
+    color: var(--text-muted);
+}
+.filtered-list-toolbar > .page-size-selector select option {
+    background: #111;
+    color: var(--text);
+}
+
+/* ── Results line + page switcher (all list pages) ────────────────── */
+.sticky-results {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+.sticky-results strong {
+    color: var(--text);
+    font-weight: 600;
+}
+.sticky-results-extra::before {
+    content: "·";
+    margin: 0 0.45rem;
+}
+
+.sticky-pager {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+.sticky-pager-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    transition: color var(--ease), background-color var(--ease);
+}
+.sticky-pager-step:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+}
+.sticky-pager-step:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+/* "1 of 3" is the visible label; an invisible page picker sits on top */
+.sticky-pager-picker {
+    position: relative;
+    margin: 0;
+    padding: 0.3rem 0.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+.sticky-pager-picker:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text);
+}
+.sticky-pager-picker select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+.sticky-pager-step:focus-visible,
+.sticky-pager-picker:focus-within {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+}
+
+/* Bottom-of-page switcher: centred */
+.pagination-footer-container {
+    display: flex;
+    justify-content: center;
+    margin: 1.5rem 0 1rem;
+}
+
+/* ── Phones ───────────────────────────────────────────────────────── */
+@media (max-width: 575.98px) {
+    /* Search takes its own full-width line */
+    .filtered-list-toolbar > .search-term-input {
+        flex-basis: 100% !important;
+        width: 100%;
+    }
+    .filtered-list-toolbar > .zoom-slider-container {
+        display: none !important;   /* Stash doesn't zoom on phones */
+    }
+    /* Results row on one line: slimmer Play, then
+       "94 scenes · 39h · 40 ▾" reading as one line of text, with the
+       page switcher on the right. */
+    .filtered-list-toolbar > .page-size-selector {
+        display: inline-flex;
+        align-items: center;
+        margin-left: -0.5rem;      /* cancel the row gap: the dot spaces it */
+        --pp-label: 1.1rem;
+    }
+    .filtered-list-toolbar > .page-size-selector::before {
+        content: "·";
+        margin: 0 0.45rem;         /* same as the dot after "94 scenes" */
+        color: var(--text-muted);
+        font-size: 1rem;
+        font-weight: 400;
+    }
+    /* The ▾ follows in the flow (after the dot and the number) and is
+       pulled back over the select's spare right edge, so tapping it
+       still opens the menu. */
+    .filtered-list-toolbar > .page-size-selector::after {
+        position: static;
+        transform: none;
+        margin-left: calc(0.35rem - var(--pp-label));
+    }
+    .pagination-index-container > .sticky-pager {
+        margin-left: auto;
+    }
+    .filtered-list-toolbar > .page-size-selector::after {
+        content: "▾";
+    }
+    .filtered-list-toolbar .play-button {
+        padding: 0 0.9rem 0 0.75rem !important;
+        gap: 0.35rem;
+    }
+    .sticky-pager-step {
+        width: 1.7rem;
+    }
+    /* "39h 18m" → "39h" to keep the results row on one line */
+    .sticky-minutes {
+        display: none;
+    }
+    .sticky-pager-picker {
+        padding: 0.3rem 0.25rem;
+    }
+}
+
+
+/* ── Phones: search on its own row, every control on the next ─────── */
+@media (max-width: 767.98px) {
+    .filtered-list-toolbar > .search-term-input {
+        flex: 1 1 100% !important;
+        width: 100%;
+    }
+    /* The Tagger button keeps its word on wide screens; on a phone the
+       word is what pushes the "…" menu onto a third row, so here it is
+       the icon alone — which is how the Studios page already looked,
+       and the layout you asked for. */
+    .filtered-list-toolbar
+        > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(4) {
+        width: 2.4rem;
+        padding: 0 !important;
+        gap: 0 !important;
+        font-size: 0 !important;
+    }
+    .filtered-list-toolbar
+        > .btn-group:not(.sort-by-select):not(:has(.filter-button)) > .btn:nth-child(4) svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    /* Everything after it shares one row and shrinks to fit */
+    div:has(> .filtered-list-toolbar) {
+        column-gap: 0.4rem;
+    }
+    .filtered-list-toolbar > .zoom-slider-container {
+        flex: 1 1 4rem;
+        min-width: 3rem;
+    }
+}
+
+/* ── Filters · Saved · sidebar: one segmented control ──────────────
+   The three of them read as one object, like grid / list / wall does,
+   with a hairline between the two groups. The negative margins cancel
+   the toolbar's own column gap so the segments touch. */
+.filtered-list-toolbar .filter-button {
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+.filtered-list-toolbar .saved-filter-dropdown > .dropdown-toggle {
+    margin-left: -0.5rem !important;
+    border-radius: 0 !important;
+}
+.sidebar-toggle-button-container > .sidebar-toggle-button {
+    margin-left: -0.5rem !important;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+}
+
+/* The hairline between that group and the view switcher. It is the
+   flex area's own ::before, so it needs no element of its own.
+   --tb-sep is the clear space either side of a hairline, and both
+   hairlines are built from it so the two read identically: this one
+   is a flex item, so it carries the gap minus the row's own. */
+div:has(> .filtered-list-toolbar) {
+    --tb-sep: 1rem;
+}
+div:has(> .filtered-list-toolbar)::before {
+    content: "";
+    order: 19;
+    align-self: center;
+    width: 1px;
+    height: 1.5rem;
+    margin: 0 calc(var(--tb-sep) - 0.5rem);
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* The sidebar button wore Stash's "sliders" mark, which reads as a
+   settings control and looked dimmer than its neighbours next to
+   their solid glyphs. An outline panel says what it does. */
+.sidebar-toggle-button svg {
+    display: none !important;
+}
+.sidebar-toggle-button::after {
+    content: "";
+    width: 1.1rem;
+    height: 1.1rem;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' fill-rule='evenodd' d='M4 3.5h16a2.5 2.5 0 0 1 2.5 2.5v12a2.5 2.5 0 0 1-2.5 2.5H4A2.5 2.5 0 0 1 1.5 18V6A2.5 2.5 0 0 1 4 3.5zm6.5 2.2v12.6H20a1.3 1.3 0 0 0 1.3-1.3V7a1.3 1.3 0 0 0-1.3-1.3z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' fill-rule='evenodd' d='M4 3.5h16a2.5 2.5 0 0 1 2.5 2.5v12a2.5 2.5 0 0 1-2.5 2.5H4A2.5 2.5 0 0 1 1.5 18V6A2.5 2.5 0 0 1 4 3.5zm6.5 2.2v12.6H20a1.3 1.3 0 0 0 1.3-1.3V7a1.3 1.3 0 0 0-1.3-1.3z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* ── The zoom slider in list view ─────────────────────────────────
+   Stash empties this container rather than removing it, so the
+   little "small / large" marks we draw either side of the slider
+   were left behind on their own. No slider inside, no container. */
+.filtered-list-toolbar > .zoom-slider-container:not(:has(input)) {
+    display: none !important;
+}
+
+/* ── Phones: no sidebar ───────────────────────────────────────────
+   The filter sidebar is a desktop affordance; on a phone it covers
+   the page and the Filters button does the same job. */
+@media (max-width: 767.98px) {
+    /* The container is flattened to display:contents by a more
+       specific rule above, so the button itself is what must go. */
+    .sidebar-toggle-button-container > .sidebar-toggle-button,
+    .sidebar-pane-content .sidebar-toggle-button,
+    .sidebar-pane > .sidebar,
+    .item-list-container > .sidebar-pane > .sidebar {
+        display: none !important;
+    }
+    /* Saved is then the end of the group, so it takes the corners */
+    .filtered-list-toolbar .saved-filter-dropdown > .dropdown-toggle {
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0 !important;
+    }
+}
+
+/* A hairline between the "…" menu and the filter group. The one
+   above is the flex area's ::before; this one rides on the Filters
+   button, since a flex area has only two pseudo-elements and ::after
+   is the row break. It sits in the middle of twice --tb-sep, so the
+   space either side of it matches the other hairline exactly. */
+.filtered-list-toolbar .filter-button {
+    position: relative;
+    margin-left: calc(2 * var(--tb-sep) - 0.5rem) !important;
+}
+.filtered-list-toolbar .filter-button::before {
+    content: "";
+    position: absolute;
+    left: calc(-1 * var(--tb-sep));
+    top: 50%;
+    width: 1px;
+    height: 1.5rem;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* Stash dims the sidebar button to half opacity, which made it look
+   faded and pressed-in beside the funnel and the bookmark. */
+.sidebar-toggle-button {
+    opacity: 1 !important;
+}
+
+
+/* ── Nothing found ────────────────────────────────────────────────
+   When a search or filter matches nothing, Stash renders no grid at
+   all, so the page below the toolbar is empty apart from the results
+   line — which looks exactly like a page still loading. list-toolbar
+   .js adds this block from inside the results-line component, the
+   only thing Stash still draws in that case. */
+/* Its container is display:contents, so the block is a flex item of
+   the centred toolbar row; give it a row of its own, below both the
+   results line (order 31) and the row of active filter chips (90),
+   rather than a slot beside them. */
+.sticky-empty {
+    order: 100;
+    flex-basis: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 5rem 1rem 6rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+.sticky-empty__icon {
+    margin-bottom: 0.6rem;
+    color: rgba(255, 255, 255, 0.28);
+}
+.sticky-empty__title {
+    margin: 0;
+    color: var(--text);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+.sticky-empty__hint {
+    margin: 0;
+    font-size: 0.95rem;
+    max-width: 30rem;
+}

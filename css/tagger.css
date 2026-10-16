@@ -1,0 +1,77 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — the Tagger
+
+   Deliberately light-touch. The Tagger is a working tool and its
+   behaviour matters more than its looks, so nothing here moves,
+   hides or restructures a control you use: this is surfaces, borders
+   and text colours, plus two things that were asked for — the panel
+   centred, and the placeholder tag pictures out of the way so the
+   tiles are short enough to scan.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Centred, and not absurdly wide ─────────────────────────────────
+   The panel looked pushed to the right because it was sharing a row
+   with the "Source" selector: our toolbar turns this pane into one
+   flex area, and the panel wasn't claiming a line of its own, so the
+   selector took the space to its left. A full-basis line plus a cap
+   and auto margins puts it in the middle of the page. */
+.tagger-container {
+    flex: 1 1 100% !important;
+    /* No cap on the container itself. A capped flex item is only as
+       wide as its cap when the browser decides what fits on a line,
+       so a 1200px panel sat down happily beside the results row and
+       came out 350px right of centre. Full width claims the line;
+       the cap and the centring move inside. */
+    max-width: none !important;
+    margin: 0 !important;
+}
+.tagger-container > .tagger-container-header,
+.tagger-container > .card {
+    max-width: min(1200px, 100%);
+    margin-inline: auto !important;
+}
+
+/* ── Surfaces ─────────────────────────────────────────────────────── */
+.tagger-container .card {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--card-radius) !important;
+    box-shadow: none !important;
+    color: var(--text);
+}
+.tagger-container .tagger-container-header .card {
+    background: var(--surface-solid) !important;
+}
+
+/* ── The tag tiles ────────────────────────────────────────────────
+   Nearly every tag uses the same placeholder picture, so a row of
+   them is 150px of identical artwork between you and the names. */
+.TagTagger-details .tag-card {
+    display: none !important;
+}
+.TagTagger-details {
+    min-height: 0 !important;
+}
+.TagTagger-header h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* ── Fields and buttons: deliberately left alone ──────────────────
+   These were themed once and it made the page worse. Each tag's row
+   is a Bootstrap .input-group — the search box and its Search button
+   are one joined control, square where they meet and rounded at the
+   outer ends. Giving the input its own 8px radius broke that join,
+   so the two sat side by side as separate rounded boxes with their
+   corners touching. Stash's own styling already gets this right, and
+   the Tagger is a tool rather than a page to look at, so the fields,
+   the buttons and the input groups keep it. */
+
+/* The stash-id chips under a matched tag */
+.tagger-container .tagger-remote-id,
+.tagger-container code {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted) !important;
+}

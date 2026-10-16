@@ -1,0 +1,267 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — image cards (Images page; mirrors the gallery cards)
+
+   image (4:3 frame, whole image shown, never cropped)
+   title
+   performer pills           ← image-cards.js
+   date ("Sep 2020")         ← image-cards.js
+   description, 2 lines
+   tag pills                 ← image-cards.js
+   studio logo · counts      ← image-cards.js (pinned to the bottom)
+
+   Every row is the same distance apart (--image-gap).
+
+   Shared pieces (.sticky-pill, .sticky-date, .sticky-card-footer,
+   .sticky-studio, .sticky-card-extras) are styled in cards.css.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Card: same as scene cards ────────────────────────────────────── */
+.image-card.card {
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg) !important;
+    border: 1px solid var(--card-border) !important;
+    border-radius: var(--card-radius) !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    transition: background-color var(--ease), border-color var(--ease);
+}
+.image-card.card:hover {
+    background: var(--card-bg-hover) !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+/* ── Image: 4:3 frame, the whole image shown ──────────────────────────
+   Images are never cropped: each sits whole inside the 4:3 frame on a
+   subtle tile (like studio logos), so the grid stays even and nothing
+   is cut off. */
+.image-card .thumbnail-section,
+.image-card .image-card-link {
+    display: block;
+    height: auto !important;
+}
+.image-card .image-card-preview {
+    position: relative;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: auto !important;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.035);
+}
+.image-card .image-card-preview-image {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    object-fit: contain !important;
+}
+/* Stash's preview button sits dead centre on every image. Stash keeps
+   it invisible until you hover — we had given it a dark disc, which
+   showed all the time and read as a grey blob in the middle of every
+   picture, worst of all on a phone where there is no hover at all.
+   The disc now fades in with the card, and on a touch screen it never
+   appears. */
+.image-card .preview-button .btn {
+    width: 2.3rem;
+    height: 2.3rem;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    opacity: 0;
+    transition: opacity var(--ease), background-color var(--ease);
+}
+@media (hover: hover) and (pointer: fine) {
+    .image-card:hover .preview-button .btn {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.55) !important;
+        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(6px);
+    }
+}
+
+/* Stash's studio logo over the thumbnail is hidden by the shared rule
+   in cards.css, since ours now sits above the title. */
+
+/* ── Body: title → performers → date → description → tags ─────────
+   The body is a column with one gap between every row, so the spacing
+   is identical throughout; rows an image doesn't have take no space. */
+.image-card {
+    --image-gap: 14px;
+}
+.image-card .card-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--image-gap);
+    padding: 14px var(--card-pad) 0 !important;    /* as scene cards */
+}
+/* Stash leaves 5px under the picture, on top of the body's padding */
+.image-card .image-card-preview {
+    margin-bottom: 0 !important;
+}
+.image-card .card-section-title {
+    margin: 0 !important;
+    font-size: 1.25rem !important;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text);
+}
+.image-card .card-section > a,
+.image-card .card-section > a:hover {
+    color: var(--text);
+    text-decoration: none;
+}
+.image-card .sticky-pills,
+.image-card .sticky-date {
+    margin: 0;
+}
+/* Stash's own raw date is replaced by the friendlier one */
+.image-card .card-section:has(.sticky-date) .image-card__date {
+    display: none !important;
+}
+/* Stash's details block holds the date (shown by ours instead) and
+   the description; with no description it's an empty row, and an
+   empty row still took a gap, which is what left the title further
+   from the tags below it than from the logo above it. */
+.image-card .image-card__details:not(:has(.image-card__description)) {
+    display: none !important;
+}
+/* Description: 2 lines (Stash sets 3 inline, hence !important) */
+.image-card .image-card__description {
+    -webkit-line-clamp: 2 !important;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.74);
+}
+
+/* ── Optical spacing ──────────────────────────────────────────────────
+   Lines of text carry invisible space above and below the letters
+   (line-height), so a 14px gap next to text looked bigger than the same
+   gap between pill rows. Trimming half of that space off each side of
+   the text rows (1lh = one line's height) makes every gap measure from
+   the visible text, so they all read as equal. */
+.image-card .card-section-title,
+.image-card .sticky-date,
+.image-card .image-card__description {
+    margin-top: calc((1em - 1lh) / 2) !important;
+    margin-bottom: calc((1em - 1lh) / 2) !important;
+}
+/* Tags are a different kind of content from the description above
+   (labels vs. text), so they get a slightly larger gap to read as a
+   separate group */
+.image-card .card-section .sticky-pills--tag {
+    margin-top: 6px !important;
+}
+
+/* Stash adds its own spacing around the description block */
+.image-card .image-card__details {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* ── Footer: studio logo, then the counts ─────────────────────────────
+   Pinned to the bottom (margin-top: auto, from cards.css) so footers
+   line up across a row. Same gap above it as between rows, and the
+   same padding below it as the card's sides. */
+.image-card .sticky-card-footer {
+    padding: var(--image-gap) var(--card-pad) var(--card-pad) !important;
+}
+.image-card .sticky-card-extras .btn {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+/* Tags and performers are shown as pills now, so their counts go */
+.image-card:has(.sticky-pills--tag) .tag-count,
+.image-card:has(.sticky-pills--performer) .performer-count {
+    display: none !important;
+}
+.image-card:has(.sticky-card-footer) > hr,
+.image-card .sticky-card-extras hr {
+    display: none !important;
+}
+.image-card .sticky-card-extras {
+    margin-left: 0;       /* counts follow the logo rather than sit right */
+}
+.image-card .sticky-card-extras .btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 0.35rem;
+}
+.image-card .sticky-card-extras .btn svg {
+    margin: 0 !important;
+}
+
+/* ── Gallery in the footer (replaces the gallery count) ───────────────
+   Styled like the counts beside it (no pill): icon + gallery name in
+   the same grey, brightening on hover. */
+/* One line: logo and counts keep their size, the gallery name takes
+   whatever room is left and only shortens with "…" when it runs out */
+.image-card .sticky-card-footer {
+    flex-wrap: nowrap;
+}
+.image-card .sticky-card-footer > .sticky-studio,
+.image-card .sticky-card-footer > .sticky-card-extras {
+    flex-shrink: 0;
+}
+.image-card .sticky-pills--gallery {
+    flex: 0 1 auto;
+    min-width: 0;
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+}
+.image-card .sticky-pills--gallery .sticky-pill {
+    gap: 0.35rem;
+    padding: 0 6px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 400;
+}
+.sticky-pill--gallery {
+    min-width: 0;
+    max-width: 100%;
+}
+.sticky-gallery-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.image-card a.sticky-pill--gallery:hover {
+    background: transparent;
+    color: var(--text);
+}
+.sticky-pill--gallery::before {
+    content: "";
+    flex-shrink: 0;
+    width: 1em;
+    height: 1em;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512'%3E%3Cpath d='M96 96c0-35.3 28.7-64 64-64h320c35.3 0 64 28.7 64 64v256c0 35.3-28.7 64-64 64H160c-35.3 0-64-28.7-64-64zM24 128c13.3 0 24 10.7 24 24v296c0 8.8 7.2 16 16 16h360c13.3 0 24 10.7 24 24s-10.7 24-24 24H64c-35.3 0-64-28.7-64-64V152c0-13.3 10.7-24 24-24z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512'%3E%3Cpath d='M96 96c0-35.3 28.7-64 64-64h320c35.3 0 64 28.7 64 64v256c0 35.3-28.7 64-64 64H160c-35.3 0-64-28.7-64-64zM24 128c13.3 0 24 10.7 24 24v296c0 8.8 7.2 16 16 16h360c13.3 0 24 10.7 24 24s-10.7 24-24 24H64c-35.3 0-64-28.7-64-64V152c0-13.3 10.7-24 24-24z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.image-card:has(.sticky-pill--gallery) .gallery-count {
+    display: none !important;
+}
+
+/* Phones hide the footer, so the body closes the card itself */
+@media (max-width: 767.98px) {
+    .image-card .card-section {
+        padding-bottom: 14px !important;
+    }
+}
+
+/* Most images have no studio, so the empty logo slot kept for lining
+   up a row only pushed the title away from the picture */
+.image-card .card-section > .sticky-studio--top:empty {
+    display: none;
+}

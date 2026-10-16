@@ -1,0 +1,259 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — group page   (group-page.js)
+
+   cover │ Group title                             Edit  ···
+         │ AKA …
+         │ ★★★★★                    ← Stash's own stars, left in place
+         │ Duration   Released   Studio
+         │ Director   Performers Part of
+         │ synopsis (3 lines, then More)
+         │ tag pills
+   ────────────────────────────────────────────────────────────────
+   Scenes 3 · Performers 2 · Sub-Groups     ← tabs, as on performers
+
+   Stash's printed details and buttons hide only while our header is
+   there, and come back while you're editing. Empty facts are left out
+   by the script, so nothing needs hiding here.
+   ─────────────────────────────────────────────────────────────────── */
+
+/* ── Page width: centred, same cap as the performer page ──────────── */
+body:has(.sticky-gp) {
+    --gp-page: calc(300px + 2rem + 1000px);
+}
+.detail-header:has(.sticky-gp) .detail-container,
+body:has(.sticky-gp) .nav-tabs,
+body:has(.sticky-gp) .tab-content {
+    max-width: min(var(--gp-page), 100%);
+    min-width: 0;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+body:has(.sticky-gp) .tab-content {
+    min-height: 100vh;
+}
+html:has(.sticky-gp),
+body:has(.sticky-gp) {
+    overflow-x: clip;
+}
+
+/* ── Frame: cover on the left, details on the right ───────────────── */
+.detail-header:has(.sticky-gp) {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+.detail-header:has(.sticky-gp):not(.sticky-gp-editing) .detail-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    padding: 0.5rem 0 1.75rem;
+}
+.detail-header:has(.sticky-gp) .detail-header-image {
+    flex: 0 0 auto;
+    width: 300px;
+    max-width: 100%;
+}
+/* Stash stacks the front and back covers inside .group-images, which
+   collapsed to nothing once the header became a flex row.
+
+   The two covers now share a single grid cell, so whichever one is
+   showing sits in exactly the same place. Before this they were two
+   items one after the other in the flow, and the hidden one still
+   occupied a couple of pixels above the visible one — so pressing
+   flip dropped the artwork 21px and pulled everything beside it
+   down with it. */
+.detail-header:has(.sticky-gp) .detail-header-image .group-images {
+    position: relative;      /* the flip button anchors to the cover */
+    display: grid;
+    grid-template-areas: "cover";
+    width: 100%;
+    height: auto;
+    padding: 0;
+}
+.detail-header:has(.sticky-gp) .detail-header-image .group-images > button {
+    grid-area: cover;
+}
+
+/* ── The flip button ──────────────────────────────────────────────
+   Stash draws it as a solid #137CBD disc — the only Bootstrap blue
+   left on the page. Same translucent-white control as the theme's
+   round buttons elsewhere, over a blur so it reads on any cover. */
+.detail-header:has(.sticky-gp) .group-images > button.flip {
+    grid-area: unset;
+    width: 2.2rem;
+    height: 2.2rem;
+    right: 0.55rem;
+    bottom: 0.55rem;
+    background: rgba(20, 28, 40, 0.65) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45) !important;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: #fff !important;
+    font-size: 0.95rem !important;
+    transition: background-color var(--ease), transform var(--ease);
+}
+.detail-header:has(.sticky-gp) .group-images > button.flip:hover,
+.detail-header:has(.sticky-gp) .group-images > button.flip:focus {
+    background: rgba(40, 54, 74, 0.85) !important;
+    color: #fff !important;
+}
+.detail-header:has(.sticky-gp) .group-images > button.flip:active {
+    transform: rotate(-90deg);
+}
+.detail-header:has(.sticky-gp) .detail-header-image img {
+    position: static;
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: none;
+    max-height: none;
+    border-radius: var(--radius);
+}
+.detail-header:has(.sticky-gp) .detail-header-image img:not(.active) {
+    display: none;
+}
+.detail-header:has(.sticky-gp) .detail-container > .row {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+}
+
+/* Stash's own title, alias line, details list, buttons and the
+   collapse arrow hide while ours is there — but NOT while you're
+   editing, when Stash needs its form and its Save/Cancel buttons
+   back. The rating stars are left alone throughout. */
+.detail-header:not(.sticky-gp-editing) .group-head:has(> .sticky-gp) > h2,
+.detail-header:not(.sticky-gp-editing) .group-head:has(> .sticky-gp) > div:has(> .alias-head),
+.detail-header:not(.sticky-gp-editing) .group-head:has(> .sticky-gp) > .detail-group,
+.detail-header:not(.sticky-gp-editing) .group-head:has(> .sticky-gp) > .details-edit {
+    display: none !important;
+}
+.detail-header.sticky-gp-editing .sticky-gp,
+.detail-header.sticky-gp-editing .sticky-gp-head {
+    display: none !important;
+}
+.group-head:has(> .sticky-gp) > .rating-stars {
+    margin: 0.5rem 0 1.25rem;
+}
+
+/* ── Title row ────────────────────────────────────────────────────── */
+.sticky-gp-head {
+    color: var(--text);
+}
+.sticky-gp-name {
+    margin: 0;
+    font-size: 2.6rem;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+/* ── Facts: label above value, three across ───────────────────────── */
+.sticky-gp-facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.25rem 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+}
+.sticky-gp-fact__label {
+    margin-bottom: 0.2rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+.sticky-gp-fact__value {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text);
+}
+.sticky-gp-link,
+.sticky-gp-link:hover {
+    color: var(--text) !important;
+    text-decoration: underline !important;
+    text-decoration-color: rgba(255, 255, 255, 0.3) !important;
+    text-underline-offset: 4px;
+}
+.sticky-gp-link:hover {
+    text-decoration-color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ── Synopsis: three lines, then More ─────────────────────────────── */
+.sticky-gp-synopsis-wrap {
+    margin-top: 1.5rem;
+}
+.sticky-gp-synopsis {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+    max-width: 60rem;
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+}
+.sticky-gp-synopsis-wrap.is-open .sticky-gp-synopsis {
+    -webkit-line-clamp: unset;
+    overflow: visible;
+}
+/* Same look as "+N more" on the tags page */
+.sticky-gp-more {
+    margin-top: 0.4rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.sticky-gp-more::after {
+    content: " \2304";
+}
+.sticky-gp-synopsis-wrap.is-open .sticky-gp-more::after {
+    content: " \2303";
+}
+.sticky-gp-more:hover {
+    color: var(--text);
+}
+
+/* ── Tag pills (no heading; the pills speak for themselves) ───────── */
+.sticky-gp-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 1.5rem;
+}
+
+/* The Sub-Groups tab's "+" button stretched right across the page:
+   the toolbar rules that stop buttons growing only apply to lists
+   inside a sidebar pane, and this panel isn't one. */
+body:has(.sticky-gp) .filtered-list-toolbar > .btn,
+body:has(.sticky-gp) .filtered-list-toolbar > button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+}
+
+/* ── Narrow screens ───────────────────────────────────────────────── */
+@media (max-width: 767.98px) {
+    .detail-header:has(.sticky-gp):not(.sticky-gp-editing) .detail-container {
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+    .detail-header:has(.sticky-gp) .detail-header-image {
+        width: 100%;
+    }
+    .sticky-gp-name {
+        font-size: 2rem;
+    }
+    .sticky-gp-facts {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+/* ── Action row (page-actions.js): ends the panel ────────────────── */
+.sticky-gp > .sticky-act-bar {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--surface-border);
+}
