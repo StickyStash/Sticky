@@ -1,6 +1,7 @@
 name: Sticky
 description: A deep-blue theme for Stash — redesigned cards, detail pages, toolbars and Settings, a phone layout with a bottom tab bar, and a Categories view for tags.
 version: 1.0.0
+url: https://github.com/StickyStash/Sticky
 ui:
   javascript:
     - js/sticky.js
