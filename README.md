@@ -133,7 +133,7 @@ One-handed browsing, as nature intended.
     </td>
     <td width="33%" valign="top">
       <h3>📦</h3>
-      <b>Ready to use/b><br>
+      <b>Ready to use</b><br>
       No dependencies, no bloat, one theme, one install.
     </td>
   </tr>
