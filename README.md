@@ -176,15 +176,22 @@ Copy this folder into your Stash plugins folder (for example `~/.stash/plugins/s
 
 ## Under the hood
 
+### Pick your theme
+
+Go to **Settings → Plugins → Sticky → Theme** and tap a tile. Four moods:
+
+- **Blue balls** — the deep blue you started with
+- **Blindfold** — dark grey
+- **Extra virgin** — emerald green
+- **Red light district** — deep red
+
+It changes straight away, and on iPhone the status bar follows.
+
 ### Choose your phone bar
 
-Go to **Settings → Plugins → Sticky → Phone tab bar**. List your four pages in order, with commas between them:
+Go to **Settings → Plugins → Sticky → Phone tab bar** and tap up to four pages, in the order you want them. Tap one again to take it out. Pages from your other plugins are there too.
 
-```
-home, scenes, images, performers
-```
-
-Everything else goes in the More menu.
+Everything else waits in the More menu.
 
 ### Turn it off
 
@@ -202,7 +209,7 @@ Stash's login page loads before any plugin, so Sticky can't reach it. But a matc
 
 ## Other plugins
 
-Most plugins pick up Sticky's look on their own. Pages they add to the menu show up in the More menu on your phone.
+Most plugins pick up Sticky's look on their own. Pages they add to the menu get their own row in the More menu on your phone, with their own icon, and you can pin them to the bar.
 
 If one looks out of place, please [open an issue](../../issues) with a screenshot.
 

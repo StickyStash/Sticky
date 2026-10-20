@@ -1,11 +1,12 @@
 name: Sticky
-description: A deep-blue theme for Stash — redesigned cards, detail pages, toolbars and Settings, a phone layout with a bottom tab bar, and a Categories view for tags.
-version: 1.0.0
+description: Modern dark theme. Redesigned cards. Easy navigation. Phone-friendly.
+version: 1.1.0
 url: https://github.com/StickyStash/Sticky
 ui:
   javascript:
     - js/sticky.js
     - js/sticky-cards.js
+    - js/theme-colours.js
     - js/page-actions.js
     - js/nav-tabbar.js
     - js/scene-cards.js
@@ -15,6 +16,7 @@ ui:
     - js/gallery-cards.js
     - js/image-cards.js
     - js/marker-cards.js
+    - js/card-rating.js
     - js/group-cards.js
     - js/group-page.js
     - js/home-rows.js
@@ -26,6 +28,7 @@ ui:
     - js/mobile-header.js
   css:
     - css/tokens.css
+    - css/themes.css
     - css/components.css
     - css/page-actions.css
     - css/navbar.css
@@ -36,6 +39,7 @@ ui:
     - css/studio-cards.css
     - css/image-cards.css
     - css/marker-cards.css
+    - css/card-rating.css
     - css/group-cards.css
     - css/group-page.css
     - css/studio-page.css
@@ -54,7 +58,11 @@ ui:
   assets:
     /: assets
 settings:
+  appearance:
+    displayName: Theme
+    description: Set the mood.
+    type: STRING
   tabBar:
     displayName: Phone tab bar
-    description: "Which four pages sit in the bar, in order. For example: home, scenes, images, performers. Everything else goes in the More menu."
+    description: "Pick four pages you can’t keep your hands off. The rest wait in More."
     type: STRING

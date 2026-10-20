@@ -1,0 +1,124 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — background themes
+
+   Four moods, picked from tiles in Settings → Plugins → Sticky
+   (theme-colours.js), which puts one class on <html>:
+
+     (none)                         Blue balls          the deep blue
+     html.sticky-theme-blindfold    Blindfold           dark grey
+     html.sticky-theme-virgin       Extra virgin        emerald green
+     html.sticky-theme-redlight     Red light district  dark red
+
+   Each one only re-points the page's tinted colours: the gradient
+   (top → middle → base), the solid surfaces behind menus and dialogs,
+   and the glass behind floating bars. Everything else on the page is
+   translucent white, so it takes the new colour on its own.
+
+   The *-rgb values are "r, g, b" for use as rgba(var(--x-rgb), a):
+     --bg-0-rgb     the base colour, for frosted bars over the page
+     --glass-rgb    the phone More panel and other floating glass
+     --glass-hi-rgb the same glass, hovered
+     --deep-rgb     the darkest shade: row arrows' fade, the lightbox
+   html.class beats :root, so these win over tokens.css and
+   components.css whatever order the files load in.
+   ─────────────────────────────────────────────────────────────────── */
+
+:root {
+    --bg-0-rgb: 13, 21, 32;
+    --glass-rgb: 20, 28, 42;
+    --glass-hi-rgb: 40, 54, 74;
+    --deep-rgb: 5, 10, 18;
+}
+
+html.sticky-theme-blindfold {
+    --gradient-top: #2e3034;
+    --gradient-mid: #1b1c1f;
+    --bg-0: #121214;
+    --surface-solid: #3d3f44;
+    --panel-solid: #1e1f22;
+    --bg-0-rgb: 18, 18, 20;
+    --glass-rgb: 26, 27, 30;
+    --glass-hi-rgb: 54, 56, 60;
+    --deep-rgb: 6, 6, 8;
+}
+
+html.sticky-theme-virgin {
+    --gradient-top: #143a2c;
+    --gradient-mid: #0c251b;
+    --bg-0: #071510;
+    --surface-solid: #25493b;
+    --panel-solid: #0e2a20;
+    --bg-0-rgb: 7, 21, 16;
+    --glass-rgb: 13, 31, 24;
+    --glass-hi-rgb: 32, 62, 50;
+    --deep-rgb: 3, 9, 6;
+}
+
+html.sticky-theme-redlight {
+    --gradient-top: #42141c;
+    --gradient-mid: #260b10;
+    --bg-0: #140608;
+    --surface-solid: #4d2229;
+    --panel-solid: #260c11;
+    --bg-0-rgb: 20, 6, 8;
+    --glass-rgb: 30, 12, 15;
+    --glass-hi-rgb: 66, 30, 36;
+    --deep-rgb: 9, 3, 4;
+}
+
+/* ── The tiles (Settings → Plugins → Sticky → Theme) ──────────────
+   One row of four on any screen: each tile is a quarter of the row,
+   so on a phone the gradients shrink rather than wrap. */
+.setting-section .setting > div.sticky-themes-setting:last-child,
+.sticky-themes-setting {
+    width: 100%;
+    text-align: left;            /* Stash right-aligns a setting's last column */
+}
+.sticky-themes {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.6rem;
+    width: 100%;
+    margin-top: 0.6rem;
+}
+.sticky-themes__tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+    padding: 0.4rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.8rem;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color var(--ease), background-color var(--ease);
+}
+.sticky-themes__tile:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+.sticky-themes__tile[aria-pressed="true"] {
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+}
+.sticky-themes__swatch {
+    display: block;
+    aspect-ratio: 16 / 10;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.sticky-themes__name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+@media (max-width: 575.98px) {
+    .sticky-themes { gap: 0.4rem; }
+    .sticky-themes__tile { padding: 0.3rem; font-size: 0.72rem; }
+    .sticky-themes__name { white-space: normal; }
+}

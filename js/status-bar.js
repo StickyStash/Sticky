@@ -24,7 +24,13 @@
     "use strict";
     if (window.Sticky && window.Sticky.off) return;   // ?sticky=off
 
-    var THEME_COLOUR = "#1f3350";      // --gradient-top, the blue at the top of the page
+    // The top of the page gradient (--gradient-top), which changes with
+    // the theme picked in Settings; read fresh each time.
+    function themeColour() {
+        var v = "";
+        try { v = getComputedStyle(document.documentElement).getPropertyValue("--gradient-top").trim(); } catch (e) { /* ignore */ }
+        return v || "#1f3350";
+    }
 
     function meta(name, content) {
         var node = document.head.querySelector("meta[name='" + name + "']");
@@ -62,7 +68,7 @@
             icon("shortcut icon", ASSETS + "favicon-64.png" + ICON_V, "64x64", "image/png");
             icon("icon", ASSETS + "favicon-32.png" + ICON_V, "32x32", "image/png");
             icon("apple-touch-icon", ASSETS + "apple-touch-icon.png" + ICON_V, "180x180");
-            meta("theme-color", THEME_COLOUR);
+            meta("theme-color", themeColour());
             meta("apple-mobile-web-app-capable", "yes");
             meta("apple-mobile-web-app-status-bar-style", "black-translucent");
             var viewport = document.head.querySelector("meta[name='viewport']");
@@ -78,6 +84,8 @@
     }
 
     apply();
+    // theme-colours.js calls this when the theme changes
+    if (window.Sticky) window.Sticky.refreshStatusBar = apply;
 
     // Watch <head> instead of polling it. apply() only writes when a
     // tag is missing or holds the wrong value, so the writes it makes

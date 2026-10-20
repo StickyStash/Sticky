@@ -293,7 +293,7 @@ div.react-select__menu-notice {
 }
 .modifier-options .modifier-option.btn.selected {
     background-color: rgba(255, 255, 255, 0.92) !important;
-    color: #0d1520 !important;
+    color: var(--bg-0) !important;
 }
 
 /* ── Date picker ──────────────────────────────────────────────────
@@ -424,7 +424,7 @@ div.react-datepicker .react-datepicker__month-dropdown {
 }
 .table thead,
 .table thead th {
-    background-color: rgba(13, 21, 32, 0.88);
+    background-color: rgba(var(--bg-0-rgb), 0.88);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border-bottom-color: var(--border);
@@ -513,7 +513,7 @@ div.react-datepicker .react-datepicker__month-dropdown {
    theme's own deep blue instead, a little denser so the image stands
    further forward. */
 .Lightbox {
-    background-color: rgba(6, 11, 19, 0.92);
+    background-color: rgba(var(--deep-rgb), 0.92);
 }
 
 /* ── Detail pages: the list under the header ──────────────────────

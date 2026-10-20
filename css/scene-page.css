@@ -351,7 +351,7 @@
    but belongs to the page it's sitting on. */
 #queue-viewer .queue-controls,
 :is(.scene-tabs, .gallery-tabs, .image-tabs) .edit-buttons-container {
-    background-color: rgba(13, 21, 32, 0.78) !important;
+    background-color: rgba(var(--bg-0-rgb), 0.78) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }

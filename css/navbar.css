@@ -332,6 +332,12 @@ nav.top-nav .navbar-toggler {
     }
 }
 
+/* A plugin item wrapped in our box (nav-tabbar.js, .sticky-probe):
+   invisible on wider screens, so the menu is exactly as Stash drew it. */
+nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-probe {
+    display: contents;
+}
+
 /* ═══ Phone: below 576px — floating icon tab bar ══════════════════════ */
 /* Bar:  Home · Scenes · Images · Galleries · Performers · More
    More: every other page (Studios, Tags, Roles, …) as labelled rows,
@@ -340,12 +346,21 @@ nav.top-nav .navbar-toggler {
    them out of the bar and lays them over the More panel when it's open. */
 @media (max-width: 575.98px) {
     nav.top-nav {
-        --more-row: 2.75rem;                 /* height of one More row   */
+        /* Height of one More row: 2.75rem, shrinking (to no less than
+           2.1rem) when plugins add so many pages that the panel would
+           otherwise run off the top of the screen. */
+        --more-rows: calc(var(--more-pages) + var(--sticky-more-utils, 4) + var(--sticky-more-extras, 0));
+        --more-row: clamp(2.1rem,
+            calc((100dvh - var(--tabbar-height) - 7rem) / var(--more-rows)),
+            2.75rem);
         --more-width: 13rem;                 /* width of the More panel  */
-        --more-pages: var(--sticky-more-pages, 3);                     /* overflow pages to make room for:
-                                                raise this if a plugin adds
-                                                another menu item */
+        --more-pages: var(--sticky-more-pages, 0);   /* rows the More panel
+                                                holds for pages (nav-tabbar.js) */
     }
+    /* How many pages wait in More is counted by nav-tabbar.js from
+       what is actually in the menu (--sticky-more-pages). A count in CSS
+       (one :has() rule per possible row) cost ~14ms of restyling on
+       every change anywhere on the page, even on desktop. */
 
     /* The bar floats above the bottom edge, clear of the iPhone home
        indicator (env() is 0 on devices without one). */
@@ -458,6 +473,22 @@ nav.top-nav .navbar-toggler {
        of turning up in the bar. */
     nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab) {
         display: none !important;
+    }
+    /* The plugin item's own link fills our box, which takes the place
+       (and the classes) of a normal item. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-probe.sticky-tab {
+        display: block;
+    }
+    /* Whatever the plugin drew (a link, or Stash's usual column box
+       around one) fills our box: Bootstrap's col-4 would otherwise
+       squeeze it to a third of the row and cut the label off. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-probe > * {
+        display: block;
+        width: 100%;
+        max-width: none;
+        height: 100%;
+        flex: none;
+        padding: 0;
     }
     /* Their places in the bar — set here only, so the desktop menu
        keeps Stash's own order. */
@@ -630,7 +661,8 @@ nav.top-nav .navbar-toggler {
         backdrop-filter: blur(34px) saturate(190%);
     }
     /* It gets the pill when you're on a page that lives inside More */
-    nav.top-nav:has(.navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab).sticky-current) .navbar-toggler {
+    nav.top-nav:has(.navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab).sticky-current) .navbar-toggler,
+    nav.top-nav:has(.navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab):not(.sticky-more):is(.active, :has(.active))) .navbar-toggler {
         color: #fff !important;
         background: var(--pill-active) !important;
     }
@@ -655,10 +687,11 @@ nav.top-nav .navbar-toggler {
         right: 0;
         bottom: calc(100% + 0.5rem);
         width: var(--more-width);
-        padding: calc(0.4rem + var(--more-pages) * var(--more-row) + 0.5rem) 0.4rem 0.4rem;
+        padding: calc(0.4rem + var(--more-pages) * var(--more-row) + 0.5rem) 0.4rem
+            calc(0.4rem + var(--sticky-more-extras, 0) * var(--more-row));
         border-radius: 1.5rem;
         /* Same glass as the bar */
-        background: rgba(20, 28, 42, 0.72);
+        background: rgba(var(--glass-rgb), 0.72);
         border: 1px solid rgba(255, 255, 255, 0.16);
         box-shadow: 0 10px 34px rgba(0, 0, 0, 0.55),
             inset 0 1px 0 rgba(255, 255, 255, 0.18);
@@ -677,19 +710,39 @@ nav.top-nav .navbar-toggler {
     }
 
     /* Overflow pages, lifted into the top of the panel, one row each.
-       Each row carries its own number (--sticky-more-i), so adding or
-       hiding a page can't shuffle the others. They are placed up from
+       Each row carries its own number (--sticky-more-i, set below from
+       its place in the menu). They are placed up from
        the bar, past the utility rows below them; nav-tabbar.js counts
        those rows as drawn (--sticky-more-utils: 4 normally, 3 without a
        login, more if another plugin adds one), so an extra or missing
        utility grows the panel instead of sliding under the pages. */
-    /* A page added by another plugin whose item won't carry our
-       markings has no row number of its own, so
-       it takes the last slot — which the count above already reserves.
-       Two such pages would share that slot; one is the norm. */
-    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not([data-sticky-key]) {
-        --sticky-more-i: var(--more-pages);
-    }
+    /* Each row's number is its place among the menu's non-tab items,
+       read from the DOM order, so a page from any plugin gets its own
+       row however it was added — no marking from us needed. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(1 of :not(.sticky-tab)) { --sticky-more-i: 1; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(2 of :not(.sticky-tab)) { --sticky-more-i: 2; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(3 of :not(.sticky-tab)) { --sticky-more-i: 3; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(4 of :not(.sticky-tab)) { --sticky-more-i: 4; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(5 of :not(.sticky-tab)) { --sticky-more-i: 5; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(6 of :not(.sticky-tab)) { --sticky-more-i: 6; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(7 of :not(.sticky-tab)) { --sticky-more-i: 7; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(8 of :not(.sticky-tab)) { --sticky-more-i: 8; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(9 of :not(.sticky-tab)) { --sticky-more-i: 9; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(10 of :not(.sticky-tab)) { --sticky-more-i: 10; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(11 of :not(.sticky-tab)) { --sticky-more-i: 11; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(12 of :not(.sticky-tab)) { --sticky-more-i: 12; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(13 of :not(.sticky-tab)) { --sticky-more-i: 13; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(14 of :not(.sticky-tab)) { --sticky-more-i: 14; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(15 of :not(.sticky-tab)) { --sticky-more-i: 15; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(16 of :not(.sticky-tab)) { --sticky-more-i: 16; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(17 of :not(.sticky-tab)) { --sticky-more-i: 17; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(18 of :not(.sticky-tab)) { --sticky-more-i: 18; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(19 of :not(.sticky-tab)) { --sticky-more-i: 19; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(20 of :not(.sticky-tab)) { --sticky-more-i: 20; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(21 of :not(.sticky-tab)) { --sticky-more-i: 21; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(22 of :not(.sticky-tab)) { --sticky-more-i: 22; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(23 of :not(.sticky-tab)) { --sticky-more-i: 23; }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :nth-child(24 of :not(.sticky-tab)) { --sticky-more-i: 24; }
 
     nav.top-nav .navbar-collapse.show > .navbar-nav:first-child > :not(.sticky-tab) {
         display: flex !important;
@@ -701,7 +754,233 @@ nav.top-nav .navbar-toggler {
         flex: none !important;
         justify-content: flex-start !important;
         bottom: calc(100% + 1.4rem +
-            (var(--sticky-more-utils, 4) + var(--more-pages) - var(--sticky-more-i, 1)) * var(--more-row));
+            (var(--sticky-more-utils, 4) + var(--sticky-more-extras, 0) +
+             var(--more-pages) - var(--sticky-more-i, 1)) * var(--more-row));
+    }
+
+    /* A plugin's page keeps the plugin's own icon, at the size of the
+       set; only a page with no icon at all gets the fallback circle.
+       "A plugin's page" is one we marked (.sticky-plugin) or one added
+       to the page after React drew the menu (no marks at all). */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-plugin .btn svg,
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab):not(.sticky-more) .btn svg {
+        display: block !important;
+        width: var(--tabbar-more-icon);
+        height: var(--tabbar-more-icon);
+        margin: 0 !important;
+        flex: 0 0 auto;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-tab.sticky-plugin .btn svg {
+        width: var(--tabbar-icon-size);
+        height: var(--tabbar-icon-size);
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > .sticky-plugin .btn:has(svg)::before,
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab):not(.sticky-more) .btn:has(svg)::before {
+        content: none !important;
+    }
+    /* Long names (plugins are fond of them) are cut short instead of
+       spilling out of the panel. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab) .btn,
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn {
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :not(.sticky-tab) .btn > span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ── Plugin pages, whatever their markup ──────────────────────
+       A plugin's menu item can be anything: Stash's own button, a plain
+       link, a link wrapped in Bootstrap column boxes, an <img> or icon
+       font for the icon, a bare label with no <span>. "A plugin's page"
+       is one we marked (.sticky-plugin) or one with no marks at all; its
+       control is Stash's .btn, or else its link (a link with no .btn
+       inside). Structural tests only — nothing here depends on :hover. */
+
+    /* Column boxes inside the item fill it, rather than a third of it */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)) [class*="col-"] {
+        width: 100% !important;
+        max-width: none !important;
+        flex: none !important;
+        padding: 0 !important;
+    }
+
+    /* Any box the link is wrapped in (a <span>, a <div>…) fills the
+       item too, so the whole row or pill is the tap target */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)) *:has(> a:not(.btn)) {   /* :has() can't nest, so the link test is looser here */
+        display: block !important;
+        width: 100% !important;
+    }
+
+    /* More: a plain link becomes the same row as Stash's buttons */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)):not(.sticky-tab) a:not(.btn):not(:has(.btn)) {
+        display: flex !important;
+        align-items: center;
+        gap: 0.8rem;
+        width: 100%;
+        height: var(--more-row);
+        padding: 0 0.8rem !important;
+        border-radius: 0.8rem;
+        color: var(--text) !important;
+        font-size: 1rem;
+        font-weight: 600;
+        text-decoration: none !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* The bar: a plain link becomes the same pill as Stash's buttons */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)).sticky-tab a:not(.btn):not(:has(.btn)) {
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: var(--tabbar-pill-w);
+        height: var(--tabbar-pill-h);
+        margin: 0 auto;
+        border-radius: var(--radius-pill);
+        color: inherit !important;
+        text-decoration: none !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)).sticky-tab.sticky-current a:not(.btn):not(:has(.btn)) {
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff !important;
+    }
+    /* No words in the bar, whether or not the label has its own
+       element: the text is sized away and the icon sized back up. */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)).sticky-tab :is(.btn, a:not(.btn):not(:has(.btn))) {
+        font-size: 0 !important;
+    }
+
+    /* Its own icon, whatever it is, at the size of the set */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)):not(.sticky-tab) :is(.btn, a:not(.btn):not(:has(.btn))) :is(svg, img) {
+        display: block !important;
+        width: var(--tabbar-more-icon) !important;
+        height: var(--tabbar-more-icon) !important;
+        margin: 0 !important;
+        flex: 0 0 auto;
+        object-fit: contain;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)).sticky-tab :is(.btn, a:not(.btn):not(:has(.btn))) :is(svg, img) {
+        display: block !important;
+        width: var(--tabbar-icon-size) !important;
+        height: var(--tabbar-icon-size) !important;
+        margin: 0 !important;
+        flex: 0 0 auto;
+        object-fit: contain;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)):not(.sticky-tab) :is(.btn, a:not(.btn):not(:has(.btn))) i {
+        font-size: var(--tabbar-more-icon) !important;
+        line-height: 1;
+        flex: 0 0 auto;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)).sticky-tab :is(.btn, a:not(.btn):not(:has(.btn))) i {
+        font-size: var(--tabbar-icon-size) !important;
+        line-height: 1;
+    }
+    /* Only a page with no icon of its own gets the fallback circle */
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)) :is(.btn, a:not(.btn):not(:has(.btn))):has(svg, img, i)::before {
+        content: none !important;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)) a:not(.btn):not(:has(.btn)):not(:has(svg, img, i))::before {
+        content: "";
+        flex: 0 0 auto;
+        width: var(--tabbar-more-icon);
+        height: var(--tabbar-more-icon);
+        background-color: currentColor;
+        -webkit-mask: var(--sticky-nav-fallback) center / contain no-repeat;
+        mask: var(--sticky-nav-fallback) center / contain no-repeat;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:first-child > :is(.sticky-plugin, :not(.sticky-tab):not(.sticky-more)).sticky-tab a:not(.btn):not(:has(.btn)):not(:has(svg, img, i))::before {
+        width: var(--tabbar-icon-size);
+        height: var(--tabbar-icon-size);
+    }
+
+    /* Plugin buttons dropped into the bar's right-hand group (Random,
+       SFW Switch, Theme Switch …). nav-tabbar.js marks each one
+       (.sticky-extra) and numbers it (--sticky-extra-i); here they are
+       laid into the bottom of the open panel, below the utilities,
+       one row each, the panel having made room for them. */
+    nav.top-nav .navbar-collapse.show ~ .navbar-buttons > .sticky-extra {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 0.8rem;
+        position: absolute;
+        z-index: 2;
+        right: 0.4rem;
+        width: calc(var(--more-width) - 0.8rem) !important;
+        height: var(--more-row) !important;
+        margin: 0 !important;
+        padding: 0 0.8rem !important;
+        border: 0 !important;
+        border-radius: 0.8rem !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: var(--text-muted) !important;
+        font-size: 1rem;
+        font-weight: 600;
+        overflow: hidden;
+        white-space: nowrap;
+        bottom: calc(100% + 0.9rem +
+            (var(--sticky-more-extras, 0) - var(--sticky-extra-i, 1)) * var(--more-row));
+    }
+    /* What's inside the row (a link, a button, or a link holding a
+       button) fills it, flat, with its label at the left. */
+    nav.top-nav .navbar-collapse.show ~ .navbar-buttons > .sticky-extra a,
+    nav.top-nav .navbar-collapse.show ~ .navbar-buttons > .sticky-extra button {
+        display: flex !important;
+        flex: 1 1 auto;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 0.8rem;
+        min-width: 0;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: inherit !important;
+        font: inherit !important;
+        text-align: left !important;
+        text-decoration: none !important;
+        overflow: hidden;
+    }
+    nav.top-nav .navbar-buttons > .sticky-extra svg {
+        width: var(--tabbar-more-icon) !important;
+        height: var(--tabbar-more-icon) !important;
+        flex: 0 0 auto;
+    }
+    /* No icon of its own: the fallback circle, like a plugin's page */
+    nav.top-nav .navbar-buttons > .sticky-extra {
+        --sticky-nav-fallback: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3C/svg%3E");
+    }
+    nav.top-nav .navbar-buttons > .sticky-extra:not(:has(svg, img))::before {
+        content: "";
+        flex: 0 0 auto;
+        width: var(--tabbar-more-icon);
+        height: var(--tabbar-more-icon);
+        background-color: currentColor;
+        -webkit-mask: var(--sticky-nav-fallback) center / contain no-repeat;
+        mask: var(--sticky-nav-fallback) center / contain no-repeat;
+    }
+    /* An icon-only button shows its tooltip as its name, like Stash's
+       own utilities. */
+    nav.top-nav .navbar-buttons > .sticky-extra [title]:has(svg)::after,
+    nav.top-nav .navbar-buttons > .sticky-extra[title]:has(svg)::after {
+        content: attr(title);
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border: 0;
+        margin: 0;
     }
 
     /* Rows: icon + label, left aligned. Utilities have no visible text
@@ -729,10 +1008,31 @@ nav.top-nav .navbar-toggler {
        the same size, as the pages above them. They were wearing
        Stash's solid glyphs at the bar's icon size, which made them
        bigger and heavier than every other row in the panel. */
+    /* Stash's own four are found by what they are (their address or
+       class), not their tooltip, so this holds in every language. A
+       plugin's utility keeps its own icon. */
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) {
+        --sticky-nav-fallback: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3C/svg%3E");
+    }
     nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn svg {
+        width: var(--tabbar-more-icon);
+        height: var(--tabbar-more-icon);
+        flex: 0 0 auto;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) > a[href$="/stats"] .btn svg,
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) > a[href$="/settings"] .btn svg,
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) > button.nav-utility svg,
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .logout-button svg {
         display: none !important;
     }
-    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn[title]::before {
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn[title]:has(svg)::before {
+        content: none;
+    }
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) > a[href$="/stats"] .btn[title]::before,
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) > a[href$="/settings"] .btn[title]::before,
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) > button.nav-utility[title]::before,
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .logout-button.logout-button[title]::before,
+    nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn[title]:not(:has(svg))::before {
         content: "";
         flex: 0 0 auto;
         width: var(--tabbar-more-icon);
@@ -743,21 +1043,24 @@ nav.top-nav .navbar-toggler {
     }
     nav.top-nav .navbar-collapse > .navbar-nav:nth-child(2) .btn[title]::after {
         content: attr(title);
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
         font-size: 1rem;
         font-weight: 600;
         line-height: 1;
     }
     /* Named by their tooltip, which is what Stash gives them */
-    nav.top-nav [title="Statistics"] {
+    nav.top-nav a[href$="/stats"] {
         --sticky-util-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 20V10M10 20V4M16 20v-7M22 20H2'/%3E%3C/svg%3E");
     }
-    nav.top-nav [title="Settings"] {
+    nav.top-nav a[href$="/settings"] {
         --sticky-util-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='3.2'/%3E%3Cpath d='M12 2.8v2.4M12 18.8v2.4M21.2 12h-2.4M5.2 12H2.8M18.5 5.5l-1.7 1.7M7.2 16.8l-1.7 1.7M18.5 18.5l-1.7-1.7M7.2 7.2L5.5 5.5'/%3E%3C/svg%3E");
     }
-    nav.top-nav [title="Help"] {
+    nav.top-nav button.nav-utility {
         --sticky-util-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M9.6 9.4a2.5 2.5 0 1 1 3 2.4v1.4'/%3E%3Cpath d='M12 16.6h.01'/%3E%3C/svg%3E");
     }
-    nav.top-nav [title="Log out"] {
+    nav.top-nav .logout-button {
         --sticky-util-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 4h3.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H15'/%3E%3Cpath d='M10 8l-4 4 4 4M6 12h9'/%3E%3C/svg%3E");
     }
 }

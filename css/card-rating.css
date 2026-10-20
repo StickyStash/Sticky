@@ -1,0 +1,52 @@
+/* ───────────────────────────────────────────────────────────────────
+   Sticky — rating pill on card thumbnails (card-rating.js)
+
+   "★ 4.5" in the thumbnail's bottom-left corner, styled as a twin of
+   the counts badge opposite it (and the duration): the same dark
+   fill, 4px corners and padding, so the thumbnail's badges match.
+   Stash's corner ribbon is hidden only
+   while the script is running (body.sticky-card-rating).
+   ─────────────────────────────────────────────────────────────────── */
+
+body.sticky-card-rating :is(.scene-card, .gallery-card, .group-card, .movie-card, .studio-card, .image-card) .rating-banner {
+    display: none !important;
+}
+
+/* Overlays sit inside the thumbnail, so the pill is placed against
+   the thumbnail itself. Stash positions every card's thumbnail except
+   the image card's, which is given its own here — otherwise the pill
+   lands on the card and drops over the file name. */
+body.sticky-card-rating .image-card .thumbnail-section {
+    position: relative;
+}
+.sticky-thumb-rating {
+    position: absolute;
+    left: 8px;
+    bottom: 10px;             /* level with the counts badge */
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 6px;         /* the counts badge: 2px + its button's 4px */
+    border-radius: 4px;       /* the counts badge's corners */
+    background: rgba(0, 0, 0, 0.72);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: var(--text);
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.4;         /* same height as the counts badge */
+    white-space: nowrap;
+    pointer-events: none;     /* taps go to the card underneath */
+}
+.sticky-thumb-rating::before {
+    content: "";
+    flex-shrink: 0;
+    /* The star only fills ~80% of its box, where the counts' icons
+       fill theirs, so its box is a little bigger to look the same. */
+    width: 0.95rem;
+    height: 0.95rem;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7L12 17.4l-6.3 3.8 1.7-7L2 9.5l7.1-.6z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l2.9 6.9 7.1.6-5.4 4.7 1.7 7L12 17.4l-6.3 3.8 1.7-7L2 9.5l7.1-.6z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
