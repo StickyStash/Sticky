@@ -436,6 +436,18 @@ div.react-datepicker .react-datepicker__month-dropdown {
 .table-list table thead {
     background-color: transparent;
 }
+/* Tables sitting inside a card (Settings → Plugins' Installed and
+   Available lists, and other settings tables) don't scroll under
+   anything, so their header row needs no frosted fill: on the card
+   it read as a near-black strip — Stash's own #30404D under the navy.
+   Just the card itself, with the divider underneath. */
+.card .table thead,
+.card .table thead th,
+.package-manager table thead {
+    background-color: transparent !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+}
 .table-striped tbody tr:nth-of-type(odd) {
     background-color: rgba(255, 255, 255, 0.03);
 }
